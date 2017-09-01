@@ -2,6 +2,7 @@
 {
     public enum SJNoteDurationEnum
     {
+        Undefined,
         Long,
         Double,
         Whole,

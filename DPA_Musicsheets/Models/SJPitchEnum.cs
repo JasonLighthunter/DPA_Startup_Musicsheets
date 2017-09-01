@@ -2,6 +2,7 @@
 {
     public enum SJPitchEnum
     {
+        Undefined,
         A,
         B,
         C,

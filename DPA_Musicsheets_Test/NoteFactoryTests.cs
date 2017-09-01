@@ -14,20 +14,14 @@ namespace DPA_Musicsheets_Test
         public void CreateFactory()
         {
             factory = new SJNoteFactory();
-            factory.AddNoteType("A", typeof(SJNote));
-            factory.AddNoteType("B", typeof(SJNote));
-            factory.AddNoteType("C", typeof(SJNote));
-            factory.AddNoteType("D", typeof(SJNote));
-            factory.AddNoteType("E", typeof(SJNote));
-            factory.AddNoteType("F", typeof(SJNote));
-            factory.AddNoteType("G", typeof(SJNote));
+            factory.AddNoteType("N", typeof(SJNote));
             factory.AddNoteType("R", typeof(SJRest));
         }
 
         [TestMethod]
         public void CreateNotePositive()
         {
-            string value = "A";
+            string value = "N";
             SJBaseNote note = factory.CreateNote(value);
             Assert.IsNotNull(note);
             Assert.IsInstanceOfType(note, typeof(SJNote));
