@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace DPA_Musicsheets.Models
 {
-    class SJNote : SJBaseNote
+    public class SJNote : SJBaseNote
     {
         private SJPitchEnum _pitch;
 
