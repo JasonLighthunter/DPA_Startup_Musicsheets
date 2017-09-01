@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace DPA_Musicsheets.Models
 {
-    class SJRest : SJBaseNote
+    public class SJRest : SJBaseNote
     {
     }
 }
