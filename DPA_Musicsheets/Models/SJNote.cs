@@ -31,6 +31,5 @@ namespace DPA_Musicsheets.Models
             get { return _octave; }
             set { _octave = value; }
         }
-
     }
 }
