@@ -103,7 +103,12 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Managers\ISJFileHandler.cs" />
     <Compile Include="Managers\MidiSequenceEventArgs.cs" />
+    <Compile Include="Managers\SJFileHandlerFactory.cs" />
+    <Compile Include="Managers\SJFileReader.cs" />
+    <Compile Include="Managers\SJLilypondFileHandler.cs" />
+    <Compile Include="Managers\SJMidiFileHandler.cs" />
     <Compile Include="Managers\SJNoteBuilder.cs" />
     <Compile Include="Managers\SJNoteFactory.cs" />
     <Compile Include="Managers\WPFStaffsEventArgs.cs" />
@@ -112,11 +117,13 @@
     <Compile Include="Managers\FileHandler.cs" />
     <Compile Include="Models\LilypondToken.cs" />
     <Compile Include="Models\LilypondTokenKind.cs" />
+    <Compile Include="Models\SJBar.cs" />
     <Compile Include="Models\SJBaseNote.cs" />
     <Compile Include="Models\SJNote.cs" />
     <Compile Include="Models\SJNoteDurationEnum.cs" />
     <Compile Include="Models\SJPitchEnum.cs" />
     <Compile Include="Models\SJRest.cs" />
+    <Compile Include="Models\SJTimeSignature.cs" />
     <Compile Include="ViewModels\MidiPlayerViewModel.cs" />
     <Compile Include="ViewModels\StaffsViewModel.cs" />
     <Compile Include="Views\MidiPlayerCtrl.xaml.cs">
