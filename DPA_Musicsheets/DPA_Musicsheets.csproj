@@ -104,6 +104,8 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Managers\MidiSequenceEventArgs.cs" />
+    <Compile Include="Managers\SJNoteBuilder.cs" />
+    <Compile Include="Managers\SJNoteFactory.cs" />
     <Compile Include="Managers\WPFStaffsEventArgs.cs" />
     <Compile Include="Managers\LilypondEventArgs.cs" />
     <Compile Include="Messages\CurrentStateMessage.cs" />
