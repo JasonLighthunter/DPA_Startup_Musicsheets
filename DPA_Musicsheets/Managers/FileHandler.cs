@@ -77,7 +77,7 @@ namespace DPA_Musicsheets.Managers
             WPFStaffsChanged?.Invoke(this, new WPFStaffsEventArgs() { Symbols = WPFStaffs, Message = message });
 
             MidiSequence = GetSequenceFromWPFStaffs();
-            MidiSequenceChanged?.Invoke(this, new MidiSequenceEventArgs() { MidiSequence = MidiSequence });
+            ?.InMidiSequenceChangedvoke(this, new MidiSequenceEventArgs() { MidiSequence = MidiSequence });
         }
 
         public void LoadMidi(Sequence sequence)

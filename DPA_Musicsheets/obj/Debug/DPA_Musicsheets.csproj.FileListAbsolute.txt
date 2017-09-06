@@ -238,3 +238,4 @@ C:\Users\steve\GitRepositories\DPA_Startup_Musicsheets\DPA_Musicsheets\obj\Debug
 C:\Users\steve\GitRepositories\DPA_Startup_Musicsheets\DPA_Musicsheets\obj\Debug\DPA_Musicsheets.csproj.CoreCompileInputs.cache
 C:\Users\steve\GitRepositories\DPA_Startup_Musicsheets\DPA_Musicsheets\obj\Debug\DPA_Musicsheets.exe
 C:\Users\steve\GitRepositories\DPA_Startup_Musicsheets\DPA_Musicsheets\obj\Debug\DPA_Musicsheets.pdb
+C:\Users\steve\GitRepositories\DPA_Startup_Musicsheets\DPA_Musicsheets\obj\Debug\DPA_Musicsheets.csprojResolveAssemblyReference.cache

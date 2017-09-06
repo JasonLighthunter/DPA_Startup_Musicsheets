@@ -12,12 +12,13 @@ namespace DPA_Musicsheets.Managers
     {
         public Sequence MidiSequence { get; set; }
         public event EventHandler<MidiSequenceEventArgs> MidiSequenceChanged;
+        private SJMidiStateHandler midiStateHandler;
 
         public void Load(string fileName)
         {
             MidiSequence = new Sequence();
             MidiSequence.Load(fileName);
-            //MidiSequenceChanged?.Invoke(this, new MidiSequenceEventArgs() { MidiSequence = MidiSequence });
+            midiStateHandler.UpdateData(MidiSequence);
             //LoadMidi(MidiSequence);
         }
 

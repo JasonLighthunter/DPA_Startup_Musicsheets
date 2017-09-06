@@ -7,21 +7,16 @@ using System.Threading.Tasks;
 
 namespace DPA_Musicsheets.Managers
 {
-    public class SJNoteFactory
+    public static class SJNoteFactory
     {
-        private Dictionary<string, Type> _types;
+        private static Dictionary<string, Type> _types;
 
-        public SJNoteFactory()
-        {
-            _types = new Dictionary<string, Type>();
-        }
-
-        public void AddNoteType(string name, Type type)
+        public static void AddNoteType(string name, Type type)
         {
             _types[name] = type;
         }
 
-        public SJBaseNote CreateNote(string type)
+        public static SJBaseNote CreateNote(string type)
         {
             if (string.IsNullOrWhiteSpace(type) || !_types.ContainsKey(type))
             {

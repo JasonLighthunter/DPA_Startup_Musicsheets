@@ -9,7 +9,7 @@ namespace DPA_Musicsheets.Managers
 {
     public interface ISJStateHandler<T, A> where T : class where A : class
     {
-        T StateData { get; }
+        T StateData { get;}
 
         event EventHandler<A> StateDataChanged;
 
