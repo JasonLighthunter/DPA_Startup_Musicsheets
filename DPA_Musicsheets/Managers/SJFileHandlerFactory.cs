@@ -22,7 +22,7 @@ namespace DPA_Musicsheets.Managers
 
         public ISJFileHandler CreateFileHandler(string type)
         {
-            if (string.IsNullOrWhiteSpace(type) || !_types.ContainsKey(type))
+            if (string.IsNullOrWhiteSpace(type) || !(_types.ContainsKey(type)))
             {
                 throw new ArgumentException(type);
             }

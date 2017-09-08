@@ -8,6 +8,7 @@
         Whole,
         Half,
         Quarter,
-        Eighth
+        Eighth,
+		Sixteenth
     }
 }

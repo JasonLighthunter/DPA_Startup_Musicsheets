@@ -16,7 +16,7 @@ namespace DPA_Musicsheets.Models
             set { _timeSignature = value; }
         }
 
-        private List<SJBaseNote> _notes;
+        private List<SJBaseNote> _notes = new List<SJBaseNote>();
 
         public List<SJBaseNote> Notes
         {

@@ -10,7 +10,7 @@ namespace DPA_Musicsheets.Managers
     public static class SJNoteBuilder
     {
 //        private static SJNoteFactory factory;
-        private static SJBaseNote note;
+        public static SJBaseNote note;
 
         public static void Prepare(string value)
         {
@@ -33,7 +33,7 @@ namespace DPA_Musicsheets.Managers
             }
         }
 
-        public static void setOctave(int octave)
+        public static void SetOctave(int octave)
         {
             if (note is SJNote)
             {
@@ -46,7 +46,7 @@ namespace DPA_Musicsheets.Managers
             note.NumberOfDots = numberofDots;
         }
 
-        public static void setDuration(SJNoteDurationEnum duration)
+        public static void SetDuration(SJNoteDurationEnum duration)
         {
             note.Duration = duration;
         }

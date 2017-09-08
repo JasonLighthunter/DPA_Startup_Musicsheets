@@ -9,7 +9,7 @@ namespace DPA_Musicsheets.Managers
 {
     public static class SJNoteFactory
     {
-        private static Dictionary<string, Type> _types;
+        private static Dictionary<string, Type> _types = new Dictionary<string, Type>();
 
         public static void AddNoteType(string name, Type type)
         {

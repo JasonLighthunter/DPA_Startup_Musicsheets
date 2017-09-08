@@ -34,9 +34,9 @@ namespace DPA_Musicsheets_Test
 
             SJNoteBuilder.Prepare(value);
             SJNoteBuilder.SetPitch(SJPitchEnum.A);
-            SJNoteBuilder.setOctave(octave);
+            SJNoteBuilder.SetOctave(octave);
             SJNoteBuilder.SetPitchAlteration(pitchAlteration);
-            SJNoteBuilder.setDuration(SJNoteDurationEnum.Whole);
+            SJNoteBuilder.SetDuration(SJNoteDurationEnum.Whole);
             SJNoteBuilder.SetNumberOfDots(numberOfDots);
             SJBaseNote note = SJNoteBuilder.Build();
 
@@ -57,7 +57,7 @@ namespace DPA_Musicsheets_Test
             
             SJNoteBuilder.Prepare(value);
             SJNoteBuilder.SetPitch(SJPitchEnum.A);
-            SJNoteBuilder.setDuration(SJNoteDurationEnum.Whole);
+            SJNoteBuilder.SetDuration(SJNoteDurationEnum.Whole);
             SJNoteBuilder.SetNumberOfDots(numberOfDots);
             SJBaseNote rest = SJNoteBuilder.Build();
 
@@ -84,7 +84,7 @@ namespace DPA_Musicsheets_Test
         [ExpectedException(typeof(ArgumentException), "necessary property have not been set.")]
         public void CreateNoteNegativeInvalidParameters()
         {
-            uint numberOfDots = 0;
+            //uint numberOfDots = 0;
             string value = "N";
 
             SJNoteBuilder.Prepare(value);

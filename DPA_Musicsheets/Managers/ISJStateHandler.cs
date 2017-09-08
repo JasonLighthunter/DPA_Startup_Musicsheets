@@ -11,8 +11,8 @@ namespace DPA_Musicsheets.Managers
     {
         T StateData { get;}
 
-        event EventHandler<A> StateDataChanged;
+		//event EventHandler<A> StateDataChanged;
 
-        void UpdateData(T data);
-    }
+		void UpdateData(T data, string message);
+	}
 }

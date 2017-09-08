@@ -7,16 +7,16 @@ using System.Threading.Tasks;
 
 namespace DPA_Musicsheets.Managers
 {
-    class SJMidiStateHandler : ISJStateHandler<Sequence, MidiSequenceEventArgs>
+    public class SJMidiStateHandler : ISJStateHandler<Sequence, MidiSequenceEventArgs>
     {
         public Sequence StateData { get; private set; }
 
-        public event EventHandler<MidiSequenceEventArgs> StateDataChanged;
+        public static event EventHandler<MidiSequenceEventArgs> StateDataChanged;
 
-        public void UpdateData(Sequence data)
+        public void UpdateData(Sequence data, string message = null)
         {
             StateData = data;
-            StateDataChanged?.Invoke(this, new MidiSequenceEventArgs() { MidiSequence = StateData });
+            StateDataChanged?.Invoke(this, new MidiSequenceEventArgs() { MidiSequence = StateData, Message = message });
         }
     }
 }

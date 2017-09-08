@@ -9,7 +9,5 @@ namespace DPA_Musicsheets.Managers
     public interface ISJFileHandler
     {
         void Load(string fileName);
-
-
     }
 }

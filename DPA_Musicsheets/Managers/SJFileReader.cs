@@ -14,6 +14,7 @@ namespace DPA_Musicsheets.Managers
         public SJFileReader(SJFileHandlerFactory fileHandlerFactory)
         {
             _fileHandlerFactory = fileHandlerFactory;
+			_fileHandlerFactory.AddFileHandlerType(".mid", typeof(SJMidiFileHandler));
         }
 
         public void ReadFile(string fileName)

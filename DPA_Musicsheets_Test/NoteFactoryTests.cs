@@ -8,21 +8,21 @@ namespace DPA_Musicsheets_Test
     [TestClass]
     public class NoteFactoryTests
     {
-        private SJNoteFactory factory;
+        //private SJNoteFactory factory;
 
         [TestInitialize]
         public void CreateFactory()
         {
-            factory = new SJNoteFactory();
-            factory.AddNoteType("N", typeof(SJNote));
-            factory.AddNoteType("R", typeof(SJRest));
+            //factory = new SJNoteFactory();
+			SJNoteFactory.AddNoteType("N", typeof(SJNote));
+			SJNoteFactory.AddNoteType("R", typeof(SJRest));
         }
 
         [TestMethod]
         public void CreateNotePositive()
         {
             string value = "N";
-            SJBaseNote note = factory.CreateNote(value);
+            SJBaseNote note = SJNoteFactory.CreateNote(value);
             Assert.IsNotNull(note);
             Assert.IsInstanceOfType(note, typeof(SJNote));
         }
@@ -31,7 +31,7 @@ namespace DPA_Musicsheets_Test
         public void CreateRestPositive()
         {
             string value = "R";
-            SJBaseNote note = factory.CreateNote(value);
+            SJBaseNote note = SJNoteFactory.CreateNote(value);
             Assert.IsNotNull(note);
             Assert.IsInstanceOfType(note, typeof(SJRest));
         }
@@ -41,14 +41,14 @@ namespace DPA_Musicsheets_Test
         public void CreateNoteNegativeWhitespace()
         {
             string value = " ";
-            SJBaseNote note = factory.CreateNote(value);
+            SJBaseNote note = SJNoteFactory.CreateNote(value);
         }
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentException), "An null was inappropriately allowed.")]
         public void CreateNoteNegativeNull()
         {
-            SJBaseNote note = factory.CreateNote(null);
+            SJBaseNote note = SJNoteFactory.CreateNote(null);
         }
 
         [TestMethod]
@@ -56,7 +56,7 @@ namespace DPA_Musicsheets_Test
         public void CreateNoteNegativeUnknown()
         {
             string value = "Q";
-            SJBaseNote note = factory.CreateNote(value);
+            SJBaseNote note = SJNoteFactory.CreateNote(value);
         }
     }
 }

@@ -109,10 +109,12 @@
     <Compile Include="Managers\SJFileHandlerFactory.cs" />
     <Compile Include="Managers\SJFileReader.cs" />
     <Compile Include="Managers\SJLilypondFileHandler.cs" />
+    <Compile Include="Managers\SJLilypondStateHandler.cs" />
     <Compile Include="Managers\SJMidiFileHandler.cs" />
     <Compile Include="Managers\SJMidiStateHandler.cs" />
     <Compile Include="Managers\SJNoteBuilder.cs" />
     <Compile Include="Managers\SJNoteFactory.cs" />
+    <Compile Include="Managers\SJWPFStaffStateHandler.cs" />
     <Compile Include="Managers\WPFStaffsEventArgs.cs" />
     <Compile Include="Managers\LilypondEventArgs.cs" />
     <Compile Include="Messages\CurrentStateMessage.cs" />
@@ -129,6 +131,7 @@
     <Compile Include="Models\SJTimeSignature.cs" />
     <Compile Include="Parsers\ISJParser.cs" />
     <Compile Include="Parsers\SJMidiParser.cs" />
+    <Compile Include="Utility\EnumConverters.cs" />
     <Compile Include="ViewModels\MidiPlayerViewModel.cs" />
     <Compile Include="ViewModels\StaffsViewModel.cs" />
     <Compile Include="Views\MidiPlayerCtrl.xaml.cs">

@@ -23,6 +23,5 @@ namespace DPA_Musicsheets.Models
             get { return _noteValueOfBeat; }
             set { _noteValueOfBeat = value; }
         }
-
     }
 }

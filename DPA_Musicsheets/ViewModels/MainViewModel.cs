@@ -1,5 +1,6 @@
 ﻿using DPA_Musicsheets.Managers;
 using DPA_Musicsheets.Messages;
+using DPA_Musicsheets.Models;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
 using Microsoft.Win32;
@@ -20,10 +21,7 @@ namespace DPA_Musicsheets.ViewModels
         private string _fileName;
         public string FileName
         {
-            get
-            {
-                return _fileName;
-            }
+            get { return _fileName; }
             set
             {
                 _fileName = value;
@@ -35,20 +33,24 @@ namespace DPA_Musicsheets.ViewModels
         public string CurrentState
         {
             get { return _currentState; }
-            set { _currentState = value; RaisePropertyChanged(() => CurrentState); }
+            set
+			{
+				_currentState = value;
+				RaisePropertyChanged(() => CurrentState);
+			}
         }
 
-        private FileHandler _fileHandler;
+		private FileHandler _fileHandler;
 
-        public MainViewModel(FileHandler fileHandler)
-        {
-            _fileHandler = fileHandler;
-            FileName = @"Files/Alle-eendjes-zwemmen-in-het-water.mid";
+		public MainViewModel(FileHandler fileHandler)
+		{ 
+			_fileHandler = fileHandler;
+			FileName = @"files/alle-eendjes-zwemmen-in-het-water.mid";
 
-            MessengerInstance.Register<CurrentStateMessage>(this, (message) => CurrentState = message.State);
-        }
+			MessengerInstance.Register<CurrentStateMessage>(this, (message) => CurrentState = message.State);
+		}
 
-        public ICommand OpenFileCommand => new RelayCommand(() =>
+		public ICommand OpenFileCommand => new RelayCommand(() =>
         {
             OpenFileDialog openFileDialog = new OpenFileDialog() { Filter = "Midi or LilyPond files (*.mid *.ly)|*.mid;*.ly" };
             if (openFileDialog.ShowDialog() == true)
@@ -56,12 +58,12 @@ namespace DPA_Musicsheets.ViewModels
                 FileName = openFileDialog.FileName;
             }
         });
-        public ICommand LoadCommand => new RelayCommand(() =>
-        {
-            _fileHandler.OpenFile(FileName);
-        });
-        
-        public ICommand OnLostFocusCommand => new RelayCommand(() =>
+		public ICommand LoadCommand => new RelayCommand(() =>
+		{
+			_fileHandler.OpenFile(FileName);
+		});
+
+		public ICommand OnLostFocusCommand => new RelayCommand(() =>
         {
             Console.WriteLine("Maingrid Lost focus");
         });
