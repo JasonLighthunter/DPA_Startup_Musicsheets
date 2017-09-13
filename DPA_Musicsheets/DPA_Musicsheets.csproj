@@ -123,6 +123,7 @@
     <Compile Include="Models\LilypondTokenKind.cs" />
     <Compile Include="Models\SJBar.cs" />
     <Compile Include="Models\SJBaseNote.cs" />
+    <Compile Include="Models\SJClefTypeEnum.cs" />
     <Compile Include="Models\SJNote.cs" />
     <Compile Include="Models\SJNoteDurationEnum.cs" />
     <Compile Include="Models\SJPitchEnum.cs" />
@@ -130,7 +131,9 @@
     <Compile Include="Models\SJSong.cs" />
     <Compile Include="Models\SJTimeSignature.cs" />
     <Compile Include="Parsers\ISJParser.cs" />
+    <Compile Include="Parsers\SJLilypondParser.cs" />
     <Compile Include="Parsers\SJMidiParser.cs" />
+    <Compile Include="Parsers\SJWPFStaffsParser.cs" />
     <Compile Include="Utility\EnumConverters.cs" />
     <Compile Include="ViewModels\MidiPlayerViewModel.cs" />
     <Compile Include="ViewModels\StaffsViewModel.cs" />

@@ -17,7 +17,7 @@ namespace DPA_Musicsheets.Parsers
             symbols.Add(GetClefSymbol(song.ClefType));
             symbols.Add(new TimeSignature(TimeSignatureType.Numbers, song.TimeSignature.NumberOfBeatsPerBar, song.TimeSignature.NoteValueOfBeat));
 
-            AddNotes(song.Notes, out List<MusicalSymbol> symbols);
+            AddNotes(song.Notes, ref symbols);
 
             return symbols;
         }
@@ -43,7 +43,15 @@ namespace DPA_Musicsheets.Parsers
             }
         }
 
-        private void AddNotes(List<SJBaseNote> notes, out List<MusicalSymbol> symbols)
+        private void AddNotes(List<SJBaseNote> notes, ref List<MusicalSymbol> symbols)
+        {
+            foreach(var note in notes)
+            {
+                symbols.Add(GetNoteSymbol(note));
+            }
+        }
+
+        private MusicalSymbol GetNoteSymbol(SJBaseNote note)
         {
             throw new NotImplementedException();
         }
