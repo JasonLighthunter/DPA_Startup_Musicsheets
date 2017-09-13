@@ -284,3 +284,15 @@ C:\Users\JobCu\Documents\GitRepositories\DPA_Startup_Musicsheets\DPA_Musicsheets
 C:\Users\JobCu\Documents\GitRepositories\DPA_Startup_Musicsheets\DPA_Musicsheets\obj\Debug\DPA_Musicsheets.csproj.CoreCompileInputs.cache
 C:\Users\JobCu\Documents\GitRepositories\DPA_Startup_Musicsheets\DPA_Musicsheets\obj\Debug\DPA_Musicsheets.exe
 C:\Users\JobCu\Documents\GitRepositories\DPA_Startup_Musicsheets\DPA_Musicsheets\obj\Debug\DPA_Musicsheets.pdb
+\\tsclient\jobcuppen\GitRepositories\DPA_Startup_Musicsheets\DPA_Musicsheets\bin\Debug\DPA_Musicsheets.exe.config
+\\tsclient\jobcuppen\GitRepositories\DPA_Startup_Musicsheets\DPA_Musicsheets\obj\Debug\DPA_Musicsheets.csprojResolveAssemblyReference.cache
+\\tsclient\jobcuppen\GitRepositories\DPA_Startup_Musicsheets\DPA_Musicsheets\obj\Debug\Views\StaffViewCtrl.baml
+\\tsclient\jobcuppen\GitRepositories\DPA_Startup_Musicsheets\DPA_Musicsheets\obj\Debug\Views\LilypondViewerCtrl.baml
+\\tsclient\jobcuppen\GitRepositories\DPA_Startup_Musicsheets\DPA_Musicsheets\obj\Debug\Views\MidiPlayerCtrl.g.cs
+\\tsclient\jobcuppen\GitRepositories\DPA_Startup_Musicsheets\DPA_Musicsheets\obj\Debug\Views\StaffViewCtrl.g.cs
+\\tsclient\jobcuppen\GitRepositories\DPA_Startup_Musicsheets\DPA_Musicsheets\obj\Debug\Views\LilypondViewerCtrl.g.cs
+\\tsclient\jobcuppen\GitRepositories\DPA_Startup_Musicsheets\DPA_Musicsheets\obj\Debug\Views\MainWindow.g.cs
+\\tsclient\jobcuppen\GitRepositories\DPA_Startup_Musicsheets\DPA_Musicsheets\obj\Debug\Views\App.g.cs
+\\tsclient\jobcuppen\GitRepositories\DPA_Startup_Musicsheets\DPA_Musicsheets\obj\Debug\GeneratedInternalTypeHelper.g.cs
+\\tsclient\jobcuppen\GitRepositories\DPA_Startup_Musicsheets\DPA_Musicsheets\obj\Debug\DPA_Musicsheets_MarkupCompile.cache
+\\tsclient\jobcuppen\GitRepositories\DPA_Startup_Musicsheets\DPA_Musicsheets\obj\Debug\DPA_Musicsheets_MarkupCompile.lref

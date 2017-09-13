@@ -22,7 +22,10 @@ namespace DPA_Musicsheets.Parsers
             SJSong song = new SJSong();
 
             int division = data.Division;
+
             int previousMidiKey = 60; // Central C;
+            song.UnheardStartNote = (SJNote)SetUnheardStartNote(previousMidiKey);
+            song.ClefType = SJClefTypeEnum.Treble;
             int previousNoteAbsoluteTicks = 0;
             double percentageOfBarReached = 0;
             bool startedNoteIsClosed = true;
@@ -291,5 +294,13 @@ namespace DPA_Musicsheets.Parsers
 			SJNoteBuilder.SetNumberOfDots(dots);
 			SJNoteBuilder.SetDuration(EnumConverters.ConvertDoubleToSJNoteDurationEnum(1.0 / duration));
 		}
-	}
+
+        private SJBaseNote SetUnheardStartNote(int midiPitchValue)
+        {
+            SJNoteBuilder.Prepare("N");
+            SetOctave(midiPitchValue, midiPitchValue);
+            SetPitchAndAlteration(midiPitchValue);
+            return SJNoteBuilder.Build();
+        }
+    }
 }

@@ -31,5 +31,22 @@ namespace DPA_Musicsheets.Models
             get { return _tempo; }
             set { _tempo = value; }
         }
+
+        private SJNote _unHeardStartNote;
+
+        public SJNote UnheardStartNote
+        {
+            get { return _unHeardStartNote; }
+            set { _unHeardStartNote = value; }
+        }
+
+        private SJClefTypeEnum _clefType;
+
+        public SJClefTypeEnum ClefType
+        {
+            get { return _clefType; }
+            set { _clefType = value; }
+        }
+
     }
 }
