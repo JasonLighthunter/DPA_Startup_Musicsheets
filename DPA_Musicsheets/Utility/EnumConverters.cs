@@ -13,21 +13,47 @@ namespace DPA_Musicsheets.Utility
 		{
 			switch(doubleValue)
 			{
-			case 2.0:
-				return SJNoteDurationEnum.Double;
-			case 1.0:
-				return SJNoteDurationEnum.Whole;
-			case 0.5:
-				return SJNoteDurationEnum.Half;
-			case 0.25:
-				return SJNoteDurationEnum.Quarter;
-			case 0.125:
-				return SJNoteDurationEnum.Eighth;
-			case 0.0625:
-				return SJNoteDurationEnum.Sixteenth;
-			default:
-				return SJNoteDurationEnum.Undefined;
+                case 4.0:
+                    return SJNoteDurationEnum.Long;
+                case 2.0:
+				    return SJNoteDurationEnum.Double;
+			    case 1.0:
+				    return SJNoteDurationEnum.Whole;
+			    case 0.5:
+				    return SJNoteDurationEnum.Half;
+			    case 0.25:
+				    return SJNoteDurationEnum.Quarter;
+			    case 0.125:
+				    return SJNoteDurationEnum.Eighth;
+			    case 0.0625:
+				    return SJNoteDurationEnum.Sixteenth;
+			    default:
+				    return SJNoteDurationEnum.Undefined;
 			}
 		}
-	}
+
+        public static double ConvertSJNoteDurationEnumToDouble(SJNoteDurationEnum enumValue)
+        {
+            switch (enumValue)
+            {
+                case SJNoteDurationEnum.Long:
+                    return 4.0;
+                case SJNoteDurationEnum.Double:
+                    return 2.0;
+                case SJNoteDurationEnum.Whole:
+                    return 1.0;
+                case SJNoteDurationEnum.Half:
+                    return 0.5;
+                case SJNoteDurationEnum.Quarter:
+                    return 0.25;
+                case SJNoteDurationEnum.Eighth:
+                    return 0.125;
+                case SJNoteDurationEnum.Sixteenth:
+                    return 0.0625;
+                default:
+                    throw new ArgumentException("recieved Enumvalue was undefined")
+
+            }
+        }
+    }
 }
