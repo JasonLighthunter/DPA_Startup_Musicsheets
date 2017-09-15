@@ -1,4 +1,7 @@
-﻿using System;
+﻿using DPA_Musicsheets.Models;
+using DPA_Musicsheets.Parsers;
+using PSAMControlLibrary;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -10,6 +13,9 @@ namespace DPA_Musicsheets.Managers
     public class SJFileReader
     {
         private SJFileHandlerFactory _fileHandlerFactory { get; set; }
+
+        private SJWPFStaffsParser staffsParser;
+        private SJWPFStaffStateHandler staffsStateHandler;
 
         public SJFileReader(SJFileHandlerFactory fileHandlerFactory)
         {
@@ -23,7 +29,9 @@ namespace DPA_Musicsheets.Managers
             try
             {
                 ISJFileHandler fileHandler = _fileHandlerFactory.CreateFileHandler(fileExtension);
-                fileHandler.Load(fileName);
+                SJSong song = fileHandler.LoadSong(fileName);
+                IEnumerable<MusicalSymbol> symbols = staffsParser.ParseFromSJSong(song);
+                staffsStateHandler.UpdateData(symbols);
             }
             catch (ArgumentException e)
             {

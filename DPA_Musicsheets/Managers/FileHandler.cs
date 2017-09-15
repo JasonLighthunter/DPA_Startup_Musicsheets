@@ -124,6 +124,7 @@ namespace DPA_Musicsheets.Managers
                                     {
                                         // Finish the last notelength.
                                         double percentageOfBar;
+
                                         lilypondContent.Append(GetNoteLength(previousNoteAbsoluteTicks, midiEvent.AbsoluteTicks, division, _beatNote, _beatsPerBar, out percentageOfBar));
                                         lilypondContent.Append(" ");
 
@@ -132,8 +133,7 @@ namespace DPA_Musicsheets.Managers
                                         {
                                             lilypondContent.AppendLine("|");
                                             percentageOfBar = percentageOfBar - 1;
-                                        }
-                                    }
+                                        }                                    }
                                     break;
                                 default: break;
                             }

@@ -21,7 +21,7 @@ namespace DPA_Musicsheets.Parsers
 
             symbols.Add(GetClefSymbol(song.ClefType));
             symbols.Add(new TimeSignature(TimeSignatureType.Numbers, song.TimeSignature.NumberOfBeatsPerBar, song.TimeSignature.NoteValueOfBeat));
-            AddNotes(song.Notes, song.UnheardStartNote.Pitch, song.UnheardStartNote.Octave, ref symbols);
+            AddBars(song.Bars, song.UnheardStartNote.Pitch, song.UnheardStartNote.Octave, ref symbols);
 
             return symbols;
         }
@@ -47,10 +47,19 @@ namespace DPA_Musicsheets.Parsers
             }
         }
 
-        private void AddNotes(List<SJBaseNote> notes, SJPitchEnum unheardStartNotePitch, int unheardStartNoteOctave, ref List<MusicalSymbol> symbols)
+        private void AddBars(List<SJBar> bars, SJPitchEnum unheardStartNotePitch, int unheardStartNoteOctave, ref List<MusicalSymbol> symbols)
         {
             SJPitchEnum previousPitch = unheardStartNotePitch;
             int previousOctave = unheardStartNoteOctave;
+            foreach (var bar in bars)
+            {
+                AddNotes(bar.Notes, ref previousPitch, ref previousOctave, ref symbols);
+                symbols.Add(new Barline());
+            }
+        }
+
+        private void AddNotes(List<SJBaseNote> notes, ref SJPitchEnum previousPitch, ref int previousOctave, ref List<MusicalSymbol> symbols)
+        {   
             foreach(var note in notes)
             {
                 if (note is SJRest)

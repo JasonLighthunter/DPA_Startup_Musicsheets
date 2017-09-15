@@ -14,7 +14,7 @@ namespace DPA_Musicsheets.Managers
 
 		public static event EventHandler<WPFStaffsEventArgs> StateDataChanged;
 
-		public void UpdateData(IEnumerable<MusicalSymbol> data, string message)
+		public void UpdateData(IEnumerable<MusicalSymbol> data, string message = null)
 		{
 			StateData = data;
 			StateDataChanged?.Invoke(this, new WPFStaffsEventArgs() { Symbols = StateData, Message = message });

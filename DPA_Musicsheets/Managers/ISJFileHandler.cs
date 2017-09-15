@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DPA_Musicsheets.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,6 +9,6 @@ namespace DPA_Musicsheets.Managers
 {
     public interface ISJFileHandler
     {
-        void Load(string fileName);
+        SJSong LoadSong(string fileName);
     }
 }

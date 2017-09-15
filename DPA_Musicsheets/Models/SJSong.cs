@@ -16,13 +16,14 @@ namespace DPA_Musicsheets.Models
             set { _timeSignature = value; }
         }
 
-        private List<SJBaseNote> _notes = new List<SJBaseNote>();
+        private List<SJBar> _bars;
 
-        public List<SJBaseNote> Notes
+        public List<SJBar> Bars
         {
-            get { return _notes; }
-            set { _notes = value; }
+            get { return _bars; }
+            set { _bars = value; }
         }
+
 
         private ulong _tempo;
 

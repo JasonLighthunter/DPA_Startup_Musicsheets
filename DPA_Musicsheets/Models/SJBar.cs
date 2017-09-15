@@ -6,8 +6,14 @@ using System.Threading.Tasks;
 
 namespace DPA_Musicsheets.Models
 {
-    class SJBar
+    public class SJBar
     {
+        private List<SJBaseNote> _notes = new List<SJBaseNote>();
 
+        public List<SJBaseNote> Notes
+        {
+            get { return _notes; }
+            set { _notes = value; }
+        }
     }
 }

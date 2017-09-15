@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using DPA_Musicsheets.Parsers;
 using DPA_Musicsheets.Models;
+using PSAMControlLibrary;
 
 namespace DPA_Musicsheets.Managers
 {
@@ -14,16 +15,19 @@ namespace DPA_Musicsheets.Managers
     {
         public Sequence MidiSequence { get; set; }
 		public SJSong Song { get; set; }
+        IEnumerable<MusicalSymbol> symbols;
 
-		private SJMidiStateHandler midiStateHandler = new SJMidiStateHandler();
+        private SJMidiStateHandler midiStateHandler = new SJMidiStateHandler();
 		private SJMidiParser midiParser = new SJMidiParser();
+        private SJWPFStaffsParser staffsParser = new SJWPFStaffsParser();
 
-        public void Load(string fileName)
+        public SJSong LoadSong(string fileName)
         {
             MidiSequence = new Sequence();
             MidiSequence.Load(fileName);
             midiStateHandler.UpdateData(MidiSequence);
 			Song = midiParser.ParseToSJSong(MidiSequence);
+            return Song;
         }
     }
 }
