@@ -15,7 +15,6 @@ namespace DPA_Musicsheets.Managers
     {
         public Sequence MidiSequence { get; set; }
 		public SJSong Song { get; set; }
-        IEnumerable<MusicalSymbol> symbols;
 
         private SJMidiStateHandler midiStateHandler = new SJMidiStateHandler();
 		private SJMidiParser midiParser = new SJMidiParser();

@@ -21,6 +21,9 @@ namespace DPA_Musicsheets.Managers
         {
             _fileHandlerFactory = fileHandlerFactory;
 			_fileHandlerFactory.AddFileHandlerType(".mid", typeof(SJMidiFileHandler));
+
+            staffsParser = new SJWPFStaffsParser();
+            staffsStateHandler = new SJWPFStaffStateHandler();
         }
 
         public void ReadFile(string fileName)
@@ -35,8 +38,11 @@ namespace DPA_Musicsheets.Managers
             }
             catch (ArgumentException e)
             {
+                Console.WriteLine(e.StackTrace);
                 throw new NotSupportedException($"File extension {Path.GetExtension(fileName)} is not supported.");
             }
+            //SJNoteFactory.AddNoteType("R", typeof(SJRest));
+            //SJNoteFactory.AddNoteType("N", typeof(SJNote));
         }
     }
 }

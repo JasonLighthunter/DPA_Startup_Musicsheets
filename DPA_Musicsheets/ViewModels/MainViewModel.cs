@@ -40,17 +40,26 @@ namespace DPA_Musicsheets.ViewModels
 			}
         }
 
-		private FileHandler _fileHandler;
+        //private FileHandler _fileHandler;
+        private SJFileReader _fileReader;
 
-		public MainViewModel(FileHandler fileHandler)
-		{ 
-			_fileHandler = fileHandler;
-			FileName = @"files/alle-eendjes-zwemmen-in-het-water.mid";
+		//public MainViewModel(FileHandler fileHandler)
+		//{ 
+		//	_fileHandler = fileHandler;
+		//	FileName = @"files/alle-eendjes-zwemmen-in-het-water.mid";
 
-			MessengerInstance.Register<CurrentStateMessage>(this, (message) => CurrentState = message.State);
-		}
+		//	MessengerInstance.Register<CurrentStateMessage>(this, (message) => CurrentState = message.State);
+		//}
 
-		public ICommand OpenFileCommand => new RelayCommand(() =>
+        public MainViewModel(SJFileReader fileReader)
+        {
+            _fileReader = fileReader;
+            FileName = @"files/alle-eendjes-zwemmen-in-het-water.mid";
+
+            MessengerInstance.Register<CurrentStateMessage>(this, (message) => CurrentState = message.State);
+        }
+
+        public ICommand OpenFileCommand => new RelayCommand(() =>
         {
             OpenFileDialog openFileDialog = new OpenFileDialog() { Filter = "Midi or LilyPond files (*.mid *.ly)|*.mid;*.ly" };
             if (openFileDialog.ShowDialog() == true)
@@ -58,12 +67,17 @@ namespace DPA_Musicsheets.ViewModels
                 FileName = openFileDialog.FileName;
             }
         });
-		public ICommand LoadCommand => new RelayCommand(() =>
-		{
-			_fileHandler.OpenFile(FileName);
-		});
+        //public ICommand LoadCommand => new RelayCommand(() =>
+        //{
+        //	_fileHandler.OpenFile(FileName);
+        //});
 
-		public ICommand OnLostFocusCommand => new RelayCommand(() =>
+        public ICommand LoadCommand => new RelayCommand(() =>
+        {
+            _fileReader.ReadFile(FileName);
+        });
+
+        public ICommand OnLostFocusCommand => new RelayCommand(() =>
         {
             Console.WriteLine("Maingrid Lost focus");
         });

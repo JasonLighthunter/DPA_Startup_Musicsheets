@@ -21,7 +21,7 @@ namespace DPA_Musicsheets.Parsers
 
             symbols.Add(GetClefSymbol(song.ClefType));
             symbols.Add(new TimeSignature(TimeSignatureType.Numbers, song.TimeSignature.NumberOfBeatsPerBar, song.TimeSignature.NoteValueOfBeat));
-            AddBars(song.Bars, song.UnheardStartNote.Pitch, song.UnheardStartNote.Octave, ref symbols);
+            AddBars(song.Bars, ref symbols);
 
             return symbols;
         }
@@ -47,18 +47,16 @@ namespace DPA_Musicsheets.Parsers
             }
         }
 
-        private void AddBars(List<SJBar> bars, SJPitchEnum unheardStartNotePitch, int unheardStartNoteOctave, ref List<MusicalSymbol> symbols)
+        private void AddBars(List<SJBar> bars, ref List<MusicalSymbol> symbols)
         {
-            SJPitchEnum previousPitch = unheardStartNotePitch;
-            int previousOctave = unheardStartNoteOctave;
             foreach (var bar in bars)
             {
-                AddNotes(bar.Notes, ref previousPitch, ref previousOctave, ref symbols);
+                AddNotes(bar.Notes, ref symbols);
                 symbols.Add(new Barline());
             }
         }
 
-        private void AddNotes(List<SJBaseNote> notes, ref SJPitchEnum previousPitch, ref int previousOctave, ref List<MusicalSymbol> symbols)
+        private void AddNotes(List<SJBaseNote> notes, ref List<MusicalSymbol> symbols)
         {   
             foreach(var note in notes)
             {
@@ -68,9 +66,7 @@ namespace DPA_Musicsheets.Parsers
                 }
                 else
                 {
-                    symbols.Add(GetNoteSymbol((SJNote)note, previousPitch, previousOctave));
-                    previousPitch = ((SJNote)note).Pitch;
-                    previousOctave = ((SJNote)note).Octave;
+                    symbols.Add(GetNoteSymbol((SJNote)note));
                 }
             }
         }
@@ -82,36 +78,15 @@ namespace DPA_Musicsheets.Parsers
             
         }
 
-        private MusicalSymbol GetNoteSymbol(SJNote note, SJPitchEnum previousPitch, int previousOctave)
+        private MusicalSymbol GetNoteSymbol(SJNote note)
         {
             // Length
             int noteLength = getBaseNoteLength(note.Duration);
             // Crosses and Moles
             int alter = note.PitchAlteration;
-            // Octaves
-            int distanceWithPreviousNote = notesorder.IndexOf(note.Pitch) - notesorder.IndexOf(previousPitch);
-            if (distanceWithPreviousNote > 3) // Shorter path possible the other way around
-            {
-                distanceWithPreviousNote -= 7; // The number of notes in an octave
-            }
-            else if (distanceWithPreviousNote < -3)
-            {
-                distanceWithPreviousNote += 7; // The number of notes in an octave
-            }
-
-            if (distanceWithPreviousNote + notesorder.IndexOf(previousPitch) >= 7)
-            {
-                previousOctave++;
-            }
-            else if (distanceWithPreviousNote + notesorder.IndexOf(previousPitch) < 0)
-            {
-                previousOctave--;
-            }
-
-            // Force up or down.
 
             var noteSymbol = new Note(
-                note.Pitch.ToString(), alter, previousOctave,
+                note.Pitch.ToString(), alter, note.Octave,
                 (MusicalSymbolDuration)noteLength, NoteStemDirection.Up, NoteTieType.None,
                 new List<NoteBeamType>() { NoteBeamType.Single }
                 );

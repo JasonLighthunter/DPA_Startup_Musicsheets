@@ -16,7 +16,7 @@ namespace DPA_Musicsheets.Models
             set { _timeSignature = value; }
         }
 
-        private List<SJBar> _bars;
+        private List<SJBar> _bars = new List<SJBar>();
 
         public List<SJBar> Bars
         {

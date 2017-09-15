@@ -21,7 +21,7 @@ namespace DPA_Musicsheets_Test
         public void ListTest()
         {
             SJSong song = new SJSong();
-            Assert.IsNotNull(song.Notes);
+            Assert.IsNotNull(song.Bars);
         }
 
         [TestMethod]

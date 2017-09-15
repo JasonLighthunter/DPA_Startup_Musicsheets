@@ -27,7 +27,9 @@ namespace DPA_Musicsheets.Utility
 				    return SJNoteDurationEnum.Eighth;
 			    case 0.0625:
 				    return SJNoteDurationEnum.Sixteenth;
-			    default:
+                case 0.03125:
+                    return SJNoteDurationEnum.ThirtySecond;
+                default:
 				    return SJNoteDurationEnum.Undefined;
 			}
 		}
@@ -50,8 +52,10 @@ namespace DPA_Musicsheets.Utility
                     return 0.125;
                 case SJNoteDurationEnum.Sixteenth:
                     return 0.0625;
+                case SJNoteDurationEnum.ThirtySecond:
+                    return 0.03125;
                 default:
-                    throw new ArgumentException("recieved Enumvalue was undefined")
+                    throw new ArgumentException("recieved Enumvalue was undefined");
 
             }
         }

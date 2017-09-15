@@ -9,6 +9,7 @@
         Half,
         Quarter,
         Eighth,
-		Sixteenth
+		Sixteenth,
+        ThirtySecond
     }
 }

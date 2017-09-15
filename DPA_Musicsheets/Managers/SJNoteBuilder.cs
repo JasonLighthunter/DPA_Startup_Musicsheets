@@ -53,7 +53,7 @@ namespace DPA_Musicsheets.Managers
 
         public static SJBaseNote Build()
         {
-            if (note != null && note.Duration != SJNoteDurationEnum.Undefined)
+            if (note != null && (note.Duration != SJNoteDurationEnum.Undefined || note is SJUnheardNote))
             {
                 if (note is SJNote && ((SJNote)note).Pitch == SJPitchEnum.Undefined)
                 {

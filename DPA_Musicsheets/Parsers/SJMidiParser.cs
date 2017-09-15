@@ -63,6 +63,7 @@ namespace DPA_Musicsheets.Parsers
                                     if (previousNoteAbsoluteTicks > 0)
                                     {
                                         // Finish the last notelength.
+                                        //TODO goed kijken naar het toevoegen van de laatste Bar aan Song
                                         AddNoteToBar(ref song, ref bar, previousNoteAbsoluteTicks, midiEvent.AbsoluteTicks, division, ref percentageOfBarReached);
                                         AddBarIfFull(ref song, ref bar, ref percentageOfBarReached);
                                     }
@@ -159,19 +160,19 @@ namespace DPA_Musicsheets.Parsers
         private void SetOctave(int previousMidiKey, int midiKey)
         {
             int octave = (midiKey / 12) - 1;
-            int distance = midiKey - previousMidiKey;
+            //int distance = midiKey - previousMidiKey;
 
-            while (distance < -6)
-            {
-                octave--;
-                distance += 8;
-            }
+            //while (distance < -6)
+            //{
+            //    octave--;
+            //    distance += 8;
+            //}
 
-            while (distance > 6)
-            {
-                octave++;
-                distance -= 8;
-            }
+            //while (distance > 6)
+            //{
+            //    octave++;
+            //    distance -= 8;
+            //}
 
             SJNoteBuilder.SetOctave(octave);
         }
@@ -239,7 +240,7 @@ namespace DPA_Musicsheets.Parsers
 
         private SJBaseNote SetUnheardStartNote(int midiPitchValue)
         {
-            SJNoteBuilder.Prepare("N");
+            SJNoteBuilder.Prepare("U");
             SetOctave(midiPitchValue, midiPitchValue);
             SetPitchAndAlteration(midiPitchValue);
             return SJNoteBuilder.Build();
@@ -260,8 +261,11 @@ namespace DPA_Musicsheets.Parsers
         {
             if (percentageOfBarReached >= 1)
             {
+                //SJBar newBar = bar;
+                //song.Bars.Add(newBar);
                 song.Bars.Add(bar);
-                bar.Notes.Clear();
+                bar = new SJBar();
+                //bar.Notes.Clear();
                 percentageOfBarReached -= 1;
             }
         }
@@ -279,7 +283,7 @@ namespace DPA_Musicsheets.Parsers
         }
         private int GetDuration(int noteLength)
         {
-            for (int i = 4; i > 0; i++)
+            for (int i = 4; i > 0; i--)
             {
                 if (noteLength > Math.Pow(2, i))
                 {

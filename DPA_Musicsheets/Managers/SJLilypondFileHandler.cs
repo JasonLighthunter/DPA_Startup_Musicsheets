@@ -25,7 +25,7 @@ namespace DPA_Musicsheets.Managers
             }
         }
 
-        public void Load(string fileName)
+        public SJSong LoadSong(string fileName)
         {
             if (Path.GetExtension(fileName).EndsWith(".ly"))
             {
@@ -38,6 +38,8 @@ namespace DPA_Musicsheets.Managers
                 LilypondText = sb.ToString();
 
                 LoadLilypond(sb.ToString());
+
+                return null;
             }
             else
             {
