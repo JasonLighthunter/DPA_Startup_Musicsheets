@@ -7,22 +7,17 @@ using System.Threading.Tasks;
 
 namespace DPA_Musicsheets.Managers
 {
-    public class SJNoteBuilder
+    public static class SJNoteBuilder
     {
-        private SJNoteFactory factory;
-        private SJBaseNote note;
+//        private static SJNoteFactory factory;
+        public static SJBaseNote note;
 
-        public SJNoteBuilder(SJNoteFactory factory)
+        public static void Prepare(string value)
         {
-            this.factory = factory;
+            note = SJNoteFactory.CreateNote(value);
         }
 
-        public void Prepare(string value)
-        {
-            note = factory.CreateNote(value);
-        }
-
-        public void SetPitch(SJPitchEnum pitch)
+        public static void SetPitch(SJPitchEnum pitch)
         {
             if(note is SJNote)
             {
@@ -30,7 +25,7 @@ namespace DPA_Musicsheets.Managers
             }
         }
 
-        public void SetPitchAlteration(int pitchAlteration)
+        public static void SetPitchAlteration(int pitchAlteration)
         {
             if (note is SJNote)
             {
@@ -38,7 +33,7 @@ namespace DPA_Musicsheets.Managers
             }
         }
 
-        public void setOctave(int octave)
+        public static void SetOctave(int octave)
         {
             if (note is SJNote)
             {
@@ -46,19 +41,19 @@ namespace DPA_Musicsheets.Managers
             }
         }
 
-        public void SetNumberOfDots(uint numberofDots)
+        public static void SetNumberOfDots(uint numberofDots)
         {
             note.NumberOfDots = numberofDots;
         }
 
-        public void setDuration(SJNoteDurationEnum duration)
+        public static void SetDuration(SJNoteDurationEnum duration)
         {
             note.Duration = duration;
         }
 
-        public SJBaseNote Build()
+        public static SJBaseNote Build()
         {
-            if (note != null && note.Duration != SJNoteDurationEnum.Undefined)
+            if (note != null && (note.Duration != SJNoteDurationEnum.Undefined || note is SJUnheardNote))
             {
                 if (note is SJNote && ((SJNote)note).Pitch == SJPitchEnum.Undefined)
                 {

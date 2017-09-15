@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace DPA_Musicsheets.Models
 {
-    class SJTimeSignature
+    public class SJTimeSignature
     {
         private uint _numberOfBeatsPerBar;
 

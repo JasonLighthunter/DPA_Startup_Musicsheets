@@ -21,6 +21,8 @@ using System.Windows.Shapes;
 using DPA_Musicsheets;
 using PSAMWPFControlLibrary;
 using DPA_Musicsheets.ViewModels;
+using DPA_Musicsheets.Managers;
+using DPA_Musicsheets.Models;
 
 namespace DPA_Musicsheets
 {
@@ -31,6 +33,9 @@ namespace DPA_Musicsheets
     {
         public MainWindow()
         {
+            SJNoteFactory.AddNoteType("R", typeof(SJRest));
+            SJNoteFactory.AddNoteType("N", typeof(SJNote));
+            SJNoteFactory.AddNoteType("U", typeof(SJUnheardNote));
             InitializeComponent();
         }
     }

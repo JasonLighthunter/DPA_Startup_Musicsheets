@@ -2,21 +2,26 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using DPA_Musicsheets.Managers;
 using DPA_Musicsheets.Models;
+using System.Collections.Generic;
 
 namespace DPA_Musicsheets_Test
 {
     [TestClass]
     public class NoteBuilderTests
     {
-        private SJNoteBuilder builder;
 
         [TestInitialize]
         public void CreateBuilder()
         {
-            SJNoteFactory factory = new SJNoteFactory();
-            factory.AddNoteType("N", typeof(SJNote));
-            factory.AddNoteType("R", typeof(SJRest));
-            builder = new SJNoteBuilder(factory);
+            SJNoteFactory.AddNoteType("N", typeof(SJNote));
+            SJNoteFactory.AddNoteType("R", typeof(SJRest));
+        }
+       
+        [TestMethod]
+        public void ListTest()
+        {
+            SJSong song = new SJSong();
+            Assert.IsNotNull(song.Bars);
         }
 
         [TestMethod]
@@ -27,13 +32,13 @@ namespace DPA_Musicsheets_Test
             uint numberOfDots = 0;
             string value = "N";
 
-            builder.Prepare(value);
-            builder.SetPitch(SJPitchEnum.A);
-            builder.setOctave(octave);
-            builder.SetPitchAlteration(pitchAlteration);
-            builder.setDuration(SJNoteDurationEnum.Whole);
-            builder.SetNumberOfDots(numberOfDots);
-            SJBaseNote note = builder.Build();
+            SJNoteBuilder.Prepare(value);
+            SJNoteBuilder.SetPitch(SJPitchEnum.A);
+            SJNoteBuilder.SetOctave(octave);
+            SJNoteBuilder.SetPitchAlteration(pitchAlteration);
+            SJNoteBuilder.SetDuration(SJNoteDurationEnum.Whole);
+            SJNoteBuilder.SetNumberOfDots(numberOfDots);
+            SJBaseNote note = SJNoteBuilder.Build();
 
             Assert.IsNotNull(note);
             Assert.IsInstanceOfType(note, typeof(SJNote));
@@ -50,11 +55,11 @@ namespace DPA_Musicsheets_Test
             uint numberOfDots = 0;
             string value = "R";
             
-            builder.Prepare(value);
-            builder.SetPitch(SJPitchEnum.A);
-            builder.setDuration(SJNoteDurationEnum.Whole);
-            builder.SetNumberOfDots(numberOfDots);
-            SJBaseNote rest = builder.Build();
+            SJNoteBuilder.Prepare(value);
+            SJNoteBuilder.SetPitch(SJPitchEnum.A);
+            SJNoteBuilder.SetDuration(SJNoteDurationEnum.Whole);
+            SJNoteBuilder.SetNumberOfDots(numberOfDots);
+            SJBaseNote rest = SJNoteBuilder.Build();
 
             Assert.IsNotNull(rest);
             Assert.IsInstanceOfType(rest, typeof(SJRest));
@@ -68,8 +73,8 @@ namespace DPA_Musicsheets_Test
         {
             string value = "N";
 
-            builder.Prepare(value);
-            SJBaseNote note = builder.Build();
+            SJNoteBuilder.Prepare(value);
+            SJBaseNote note = SJNoteBuilder.Build();
 
             Assert.IsNotNull(note);
             Assert.IsInstanceOfType(note, typeof(SJNote));
@@ -79,18 +84,18 @@ namespace DPA_Musicsheets_Test
         [ExpectedException(typeof(ArgumentException), "necessary property have not been set.")]
         public void CreateNoteNegativeInvalidParameters()
         {
-            uint numberOfDots = 0;
+            //uint numberOfDots = 0;
             string value = "N";
 
-            builder.Prepare(value);
-            SJBaseNote note = builder.Build();
+            SJNoteBuilder.Prepare(value);
+            SJBaseNote note = SJNoteBuilder.Build();
         }
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentException), "An null was inappropriately allowed.")]
         public void CreateNoteNegativeNull()
         {
-            builder.Prepare(null);
+            SJNoteBuilder.Prepare(null);
         }
     }
 }

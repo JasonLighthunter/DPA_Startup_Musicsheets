@@ -23,5 +23,15 @@ namespace DPA_Musicsheets.Models
             get { return _duration; }
             set { _duration = value; }
         }
+
+        //TODO: iets 
+        private SJBaseNote _nextNote;   
+
+        public SJBaseNote NextNote
+        {
+            get { return _nextNote; }
+            set { _nextNote = value; }
+        }
+
     }
 }

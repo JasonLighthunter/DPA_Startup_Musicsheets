@@ -23,7 +23,7 @@ namespace DPA_Musicsheets.Managers
             set
             {
                 _lilypondText = value;
-                LilypondTextChanged?.Invoke(this, new LilypondEventArgs() { LilypondText = value });
+				lilypondStatehandler.UpdateData(value);
             }
         }
         public List<MusicalSymbol> WPFStaffs { get; set; } = new List<MusicalSymbol>();
@@ -31,9 +31,9 @@ namespace DPA_Musicsheets.Managers
 
         public Sequence MidiSequence { get; set; }
 
-        public event EventHandler<LilypondEventArgs> LilypondTextChanged;
-        public event EventHandler<WPFStaffsEventArgs> WPFStaffsChanged;
-        public event EventHandler<MidiSequenceEventArgs> MidiSequenceChanged;
+		private SJMidiStateHandler midiStateHandler = new SJMidiStateHandler();
+		private SJWPFStaffStateHandler staffStateHandler = new SJWPFStaffStateHandler();
+		private SJLilypondStateHandler lilypondStatehandler = new SJLilypondStateHandler();
 
         private int _beatNote = 4;    // De waarde van een beatnote.
         private int _bpm = 120;       // Aantal beatnotes per minute.
@@ -45,7 +45,7 @@ namespace DPA_Musicsheets.Managers
             {
                 MidiSequence = new Sequence();
                 MidiSequence.Load(fileName);
-                MidiSequenceChanged?.Invoke(this, new MidiSequenceEventArgs() { MidiSequence = MidiSequence });
+				midiStateHandler.UpdateData(MidiSequence);
                 LoadMidi(MidiSequence);
             }
             else if (Path.GetExtension(fileName).EndsWith(".ly"))
@@ -74,10 +74,12 @@ namespace DPA_Musicsheets.Managers
             WPFStaffs.Clear();
             string message;
             WPFStaffs.AddRange(GetStaffsFromTokens(tokens, out message));
-            WPFStaffsChanged?.Invoke(this, new WPFStaffsEventArgs() { Symbols = WPFStaffs, Message = message });
+
+			staffStateHandler.UpdateData(WPFStaffs, message);
 
             MidiSequence = GetSequenceFromWPFStaffs();
-            MidiSequenceChanged?.Invoke(this, new MidiSequenceEventArgs() { MidiSequence = MidiSequence });
+
+			midiStateHandler.UpdateData(MidiSequence);
         }
 
         public void LoadMidi(Sequence sequence)
@@ -122,6 +124,7 @@ namespace DPA_Musicsheets.Managers
                                     {
                                         // Finish the last notelength.
                                         double percentageOfBar;
+
                                         lilypondContent.Append(GetNoteLength(previousNoteAbsoluteTicks, midiEvent.AbsoluteTicks, division, _beatNote, _beatsPerBar, out percentageOfBar));
                                         lilypondContent.Append(" ");
 
@@ -130,8 +133,7 @@ namespace DPA_Musicsheets.Managers
                                         {
                                             lilypondContent.AppendLine("|");
                                             percentageOfBar = percentageOfBar - 1;
-                                        }
-                                    }
+                                        }                                    }
                                     break;
                                 default: break;
                             }
