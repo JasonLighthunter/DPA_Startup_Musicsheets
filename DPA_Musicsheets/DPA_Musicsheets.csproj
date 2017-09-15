@@ -133,6 +133,7 @@
     <Compile Include="Parsers\ISJParser.cs" />
     <Compile Include="Parsers\SJLilypondParser.cs" />
     <Compile Include="Parsers\SJMidiParser.cs" />
+    <Compile Include="Parsers\SJMusicXMLParser.cs" />
     <Compile Include="Parsers\SJWPFStaffsParser.cs" />
     <Compile Include="Utility\EnumConverters.cs" />
     <Compile Include="ViewModels\MidiPlayerViewModel.cs" />
