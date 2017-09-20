@@ -14,15 +14,22 @@ namespace DPA_Musicsheets.Managers
     {
         private SJFileHandlerFactory _fileHandlerFactory { get; set; }
 
+        private SJLilypondParser lilypondParser;
         private SJWPFStaffsParser staffsParser;
+
+        private SJLilypondStateHandler lilypondStateHandler;
         private SJWPFStaffStateHandler staffsStateHandler;
+        
 
         public SJFileReader(SJFileHandlerFactory fileHandlerFactory)
         {
             _fileHandlerFactory = fileHandlerFactory;
 			_fileHandlerFactory.AddFileHandlerType(".mid", typeof(SJMidiFileHandler));
 
+            lilypondParser = new SJLilypondParser();
             staffsParser = new SJWPFStaffsParser();
+
+            lilypondStateHandler = new SJLilypondStateHandler();
             staffsStateHandler = new SJWPFStaffStateHandler();
         }
 
@@ -33,7 +40,11 @@ namespace DPA_Musicsheets.Managers
             {
                 ISJFileHandler fileHandler = _fileHandlerFactory.CreateFileHandler(fileExtension);
                 SJSong song = fileHandler.LoadSong(fileName);
+
+                string lilypondContent = lilypondParser.ParseFromSJSong(song);
                 IEnumerable<MusicalSymbol> symbols = staffsParser.ParseFromSJSong(song);
+
+                lilypondStateHandler.UpdateData(lilypondContent);
                 staffsStateHandler.UpdateData(symbols);
             }
             catch (ArgumentException e)
@@ -41,8 +52,6 @@ namespace DPA_Musicsheets.Managers
                 Console.WriteLine(e.StackTrace);
                 throw new NotSupportedException($"File extension {Path.GetExtension(fileName)} is not supported.");
             }
-            //SJNoteFactory.AddNoteType("R", typeof(SJRest));
-            //SJNoteFactory.AddNoteType("N", typeof(SJNote));
         }
     }
 }
