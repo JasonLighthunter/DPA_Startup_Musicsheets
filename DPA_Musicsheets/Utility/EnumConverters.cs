@@ -59,5 +59,45 @@ namespace DPA_Musicsheets.Utility
 
             }
         }
+
+        public static SJPitchEnum ConvertCharToSJNotePitchEnum(char pitchCharacter)
+        {
+            switch (pitchCharacter)
+            {
+                case 'a':
+                    return SJPitchEnum.A;
+                case 'b':
+                    return SJPitchEnum.B;
+                case 'c':
+                    return SJPitchEnum.C;
+                case 'd':
+                    return SJPitchEnum.D;
+                case 'e':
+                    return SJPitchEnum.E;
+                case 'f':
+                    return SJPitchEnum.F;
+                case 'g':
+                    return SJPitchEnum.G;
+                default:
+                    return SJPitchEnum.Undefined;
+            }
+        }
+
+        public static SJClefTypeEnum ConvertStringToClefTypeEnum(string clefTypeString)
+        {
+            switch (clefTypeString.ToLower())
+            {
+                case "treble":
+                    return SJClefTypeEnum.Treble;
+                case "bass":
+                    return SJClefTypeEnum.Bass;
+                case "tenor":
+                    return SJClefTypeEnum.Tenor;
+                case "alto":
+                    return SJClefTypeEnum.Alto;
+                default:
+                    return SJClefTypeEnum.Undefined;
+            }
+        }
     }
 }
