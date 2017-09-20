@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using DPA_Musicsheets.Models;
 using DPA_Musicsheets.Utility;
 using System.Text.RegularExpressions;
+using DPA_Musicsheets.Managers;
 
 namespace DPA_Musicsheets.Parsers
 {
@@ -43,9 +44,14 @@ namespace DPA_Musicsheets.Parsers
             int previousOctave = 4;
             SJPitchEnum previousPitch = SJPitchEnum.Undefined;
             string previousLilypondItemString = "";
+            SJBar currentBar = new SJBar();
+            bool isNote;
+            bool isRest;
 
             foreach (string lilypondItemString in content.Split(' '))
             {
+                isNote = false;
+                isRest = false;
                 LilypondToken token = new LilypondToken()
                 {
                     Value = lilypondItemString
@@ -59,36 +65,52 @@ namespace DPA_Musicsheets.Parsers
                     case "\\clef":
                         song.ClefType = GetSJClefType(lilypondItemString);
                         break;
-                    case "\\time": token.TokenKind = LilypondTokenKind.Time; break;
-                    case "\\tempo": token.TokenKind = LilypondTokenKind.Tempo; break;
-                    case "|": token.TokenKind = LilypondTokenKind.Bar; break;
-                    default: token.TokenKind = LilypondTokenKind.Unknown; break;
+                    case "\\time":
+                        song.TimeSignature = this.GetSJTimeSignature(lilypondItemString);
+                        break;
+                    case "\\tempo":
+                        // Tempo is not supported
+                        break;
+                    case "|":
+                        song.Bars.Add(currentBar);
+                        currentBar = new SJBar();
+                        break;
+                    default:
+                        isNote = new Regex(@"[a-g][,'eis]*[0-9]+[.]*").IsMatch(previousLilypondItemString);
+                        isRest = new Regex(@"r.*?[0-9][.]*").IsMatch(previousLilypondItemString);
+                        break;
                 }
 
                 //token.Value = lilypondItemString;
 
-                if (token.TokenKind == LilypondTokenKind.Unknown && new Regex(@"[a-g][,'eis]*[0-9]+[.]*").IsMatch(s))
+                if (isNote)
                 {
-                    token.TokenKind = LilypondTokenKind.Note;
+                    currentBar.Notes.Add(this.GetSJNote(previousLilypondItemString, ref previousOctave, ref previousPitch));
                 }
-                else if (token.TokenKind == LilypondTokenKind.Unknown && new Regex(@"r.*?[0-9][.]*").IsMatch(s))
+                else if (isRest)
                 {
-                    token.TokenKind = LilypondTokenKind.Rest;
-                }
-
-                if (tokens.Last != null)
-                {
-                    tokens.Last.Value.NextToken = token;
-                    token.PreviousToken = tokens.Last.Value;
+                    currentBar.Notes.Add(this.GetSJRest(previousLilypondItemString));
                 }
 
-                tokens.AddLast(token);
+                if(lilypondItemString == "}")
+                {
+                    song.Bars.Add(currentBar);
+                    currentBar = new SJBar();
+                }
+
                 previousLilypondItemString = lilypondItemString;
             }
 
             return song;
+        }
 
-//            WPFStaffs.AddRange(GetStaffsFromTokens(tokens, out message));
+        private SJTimeSignature GetSJTimeSignature(string lilypondItemString)
+        {
+            SJTimeSignature timeSignature = new SJTimeSignature();
+            var times = lilypondItemString.Split('/');
+            timeSignature.NumberOfBeatsPerBar = uint.Parse(times[0]);
+            timeSignature.NoteValueOfBeat = uint.Parse(times[1]);
+            return timeSignature;
         }
 
         private SJClefTypeEnum GetSJClefType(string lilypondItemString)
@@ -98,15 +120,53 @@ namespace DPA_Musicsheets.Parsers
             return cleftTypeEnum;
         }
 
+        private SJRest GetSJRest(string lilypondItemString)
+        {
+            SJNoteBuilder.Prepare("R");
+            SJNoteBuilder.SetDuration(GetSJDuration(lilypondItemString));
+            SJNoteBuilder.SetNumberOfDots(GetSJNumberOfDots(lilypondItemString));
+            return (SJRest)SJNoteBuilder.Build();
+        }
+
+        private SJNote GetSJNote(string lilypondItemString, ref int previousOctave, ref SJPitchEnum previousPitch)
+        {
+            SJPitchEnum pitch = GetSJPitch(lilypondItemString);
+            SJNoteBuilder.Prepare("N");
+            SJNoteBuilder.SetPitch(pitch);
+            SJNoteBuilder.SetPitchAlteration(GetSJPitchAlteration(lilypondItemString));
+            SJNoteBuilder.SetOctave(GetSJOctave(lilypondItemString, previousOctave, previousPitch, pitch));
+            SJNoteBuilder.SetDuration(GetSJDuration(lilypondItemString));
+            SJNoteBuilder.SetNumberOfDots(GetSJNumberOfDots(lilypondItemString));
+            SJNote note = (SJNote) SJNoteBuilder.Build();
+            previousOctave = note.Octave;
+            previousPitch = pitch;
+            return note;
+        }
+
         private SJNote GetSJUnheardStartNote(string lilypondItemString, ref int previousOctave, ref SJPitchEnum previousPitch)
         {
-            SJUnheardNote unheardNote = new SJUnheardNote();
-            unheardNote.Pitch = GetSJPitch(lilypondItemString);
-            unheardNote.PitchAlteration = GetSJPitchAlteration(lilypondItemString);
-            unheardNote.Octave = GetSJOctave(lilypondItemString, previousOctave, previousPitch, unheardNote.Pitch);
-            previousOctave = unheardNote.Octave;
-            previousPitch = unheardNote.Pitch;
-            return unheardNote;
+            SJPitchEnum pitch = GetSJPitch(lilypondItemString);
+            SJNoteBuilder.Prepare("U");
+            SJNoteBuilder.SetPitch(pitch);
+            SJNoteBuilder.SetPitchAlteration(GetSJPitchAlteration(lilypondItemString));
+            SJNoteBuilder.SetOctave(GetSJOctave(lilypondItemString, previousOctave, previousPitch, pitch));
+            SJUnheardNote note = (SJUnheardNote)SJNoteBuilder.Build();
+            previousOctave = note.Octave;
+            previousPitch = pitch;
+            return note;
+        }
+
+        private uint GetSJNumberOfDots(string lilypondItemString)
+        {
+            uint numberOfDots = (uint)lilypondItemString.Count(c => c.Equals('.'));
+            return numberOfDots;
+        }
+
+        private SJNoteDurationEnum GetSJDuration(string lilypondItemString)
+        {
+            int noteLength = Int32.Parse(Regex.Match(lilypondItemString, @"\d+").Value);
+            SJNoteDurationEnum duration = EnumConverters.ConvertDoubleToSJNoteDurationEnum(1 / noteLength);
+            return duration;
         }
 
         private int GetSJOctave(string lilypondItemString, int previousOctave, SJPitchEnum previousPitch, SJPitchEnum currentPitch)
@@ -135,7 +195,6 @@ namespace DPA_Musicsheets.Parsers
             // Force up or down.
             octave += lilypondItemString.Count(c => c == '\'');
             octave -= lilypondItemString.Count(c => c == ',');
-            throw new NotImplementedException();
             return octave;
         }
 
@@ -213,16 +272,15 @@ namespace DPA_Musicsheets.Parsers
 
         private string GetRest(SJRest rest)
         {
-            string restString = "r";
-            return restString;
+            return "r";
         }
 
         private string GetNote(SJNote note, ref int previousOctave)
         {
             string noteString;
+
             noteString = note.Pitch.ToString().ToLower();
             noteString = noteString + GetAlteration(note);
-
             noteString = noteString + GetOctaveDifference(note, ref previousOctave);
 
             return noteString;

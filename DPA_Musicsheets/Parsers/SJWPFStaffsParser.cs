@@ -11,7 +11,6 @@ namespace DPA_Musicsheets.Parsers
 {
     public class SJWPFStaffsParser : ISJParser<IEnumerable<MusicalSymbol>>
     {
-
         public IEnumerable<MusicalSymbol> ParseFromSJSong(SJSong song)
         {
             List<MusicalSymbol> symbols = new List<MusicalSymbol>();
