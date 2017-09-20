@@ -25,9 +25,10 @@ namespace DPA_Musicsheets.Parsers
             lilypondContent.AppendLine(GetTempo(song.Tempo));
 
             int previousOctave = song.UnheardStartNote.Octave;
+            SJPitchEnum previousPitch = song.UnheardStartNote.Pitch;
             foreach (SJBar bar in song.Bars)
             {
-                lilypondContent.AppendLine(GetBar(bar, ref previousOctave));
+                lilypondContent.AppendLine(GetBar(bar, ref previousOctave, ref previousPitch));
             }
 
             lilypondContent.AppendLine("}");
@@ -41,7 +42,7 @@ namespace DPA_Musicsheets.Parsers
 
             string content = data.Trim().ToLower().Replace("\r\n", " ").Replace("\n", " ").Replace("  ", " ");
 
-            int previousOctave = 4;
+            int previousOctave = 3;
             SJPitchEnum previousPitch = SJPitchEnum.Undefined;
             string previousLilypondItemString = "";
             SJBar currentBar = new SJBar();
@@ -94,8 +95,11 @@ namespace DPA_Musicsheets.Parsers
 
                 if(lilypondItemString == "}")
                 {
-                    song.Bars.Add(currentBar);
-                    currentBar = new SJBar();
+                    if (currentBar.Notes.Count != 0)
+                    {
+                        song.Bars.Add(currentBar);
+                        currentBar = new SJBar();
+                    }
                 }
 
                 previousLilypondItemString = lilypondItemString;
@@ -137,7 +141,8 @@ namespace DPA_Musicsheets.Parsers
             SJNoteBuilder.SetOctave(GetSJOctave(lilypondItemString, previousOctave, previousPitch, pitch));
             SJNoteBuilder.SetDuration(GetSJDuration(lilypondItemString));
             SJNoteBuilder.SetNumberOfDots(GetSJNumberOfDots(lilypondItemString));
-            SJNote note = (SJNote) SJNoteBuilder.Build();
+            var tempNote = SJNoteBuilder.Build();
+            SJNote note = (SJNote)tempNote;
             previousOctave = note.Octave;
             previousPitch = pitch;
             return note;
@@ -165,7 +170,7 @@ namespace DPA_Musicsheets.Parsers
         private SJNoteDurationEnum GetSJDuration(string lilypondItemString)
         {
             int noteLength = Int32.Parse(Regex.Match(lilypondItemString, @"\d+").Value);
-            SJNoteDurationEnum duration = EnumConverters.ConvertDoubleToSJNoteDurationEnum(1 / noteLength);
+            SJNoteDurationEnum duration = EnumConverters.ConvertDoubleToSJNoteDurationEnum(1.0 / noteLength);
             return duration;
         }
 
@@ -249,7 +254,7 @@ namespace DPA_Musicsheets.Parsers
             return tempoString;
         }
 
-        private string GetBar(SJBar bar, ref int previousOctave)
+        private string GetBar(SJBar bar, ref int previousOctave, ref SJPitchEnum previousPitch)
         {
             string barString = "";
             foreach (var note in bar.Notes)
@@ -260,7 +265,7 @@ namespace DPA_Musicsheets.Parsers
                 }
                 else
                 {
-                    barString = barString + GetNote((SJNote)note, ref previousOctave);
+                    barString = barString + GetNote((SJNote)note, ref previousOctave, ref previousPitch);
                 }
                 barString = barString + GetDuration(note.Duration, note.NumberOfDots);
                 barString = barString + " ";
@@ -275,21 +280,40 @@ namespace DPA_Musicsheets.Parsers
             return "r";
         }
 
-        private string GetNote(SJNote note, ref int previousOctave)
+        private string GetNote(SJNote note, ref int previousOctave, ref SJPitchEnum previousPitch)
         {
             string noteString;
 
             noteString = note.Pitch.ToString().ToLower();
             noteString = noteString + GetAlteration(note);
-            noteString = noteString + GetOctaveDifference(note, ref previousOctave);
+            noteString = noteString + GetOctaveDifference(note, ref previousOctave, previousPitch);
+            previousPitch = note.Pitch;
 
             return noteString;
         }
 
-        private string GetOctaveDifference(SJNote note, ref int previousOctave)
+        private string GetOctaveDifference(SJNote note, ref int previousOctave, SJPitchEnum previousPitch)
         {
             string octaveDifferenceString = "";
-            int octaveDifference = previousOctave - note.Octave;
+            int octaveDifference = note.Octave - previousOctave;
+            int distanceWithPreviousPitch = notesorder.IndexOf(note.Pitch) - notesorder.IndexOf(previousPitch);
+            if (distanceWithPreviousPitch > 3) // Shorter path possible the other way around
+            {
+                distanceWithPreviousPitch -= 7; // The number of notes in an octave
+            }
+            else if (distanceWithPreviousPitch < -3)
+            {
+                distanceWithPreviousPitch += 7; // The number of notes in an octave
+            }
+
+            if (distanceWithPreviousPitch + notesorder.IndexOf(previousPitch) >= 7)
+            {
+                octaveDifference--;
+            }
+            else if (distanceWithPreviousPitch + notesorder.IndexOf(previousPitch) < 0)
+            {
+                octaveDifference++;
+            }
 
             while (octaveDifference > 0)
             {
@@ -305,7 +329,6 @@ namespace DPA_Musicsheets.Parsers
             previousOctave = note.Octave;
 
             return octaveDifferenceString;
-
         }
 
         private string GetAlteration(SJNote note)
