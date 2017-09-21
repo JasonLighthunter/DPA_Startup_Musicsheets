@@ -25,6 +25,7 @@ namespace DPA_Musicsheets.Managers
         {
             _fileHandlerFactory = fileHandlerFactory;
 			_fileHandlerFactory.AddFileHandlerType(".mid", typeof(SJMidiFileHandler));
+            _fileHandlerFactory.AddFileHandlerType(".ly", typeof(SJLilypondFileHandler));
 
             lilypondParser = new SJLilypondParser();
             staffsParser = new SJWPFStaffsParser();

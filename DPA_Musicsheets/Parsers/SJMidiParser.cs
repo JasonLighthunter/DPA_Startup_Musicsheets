@@ -25,7 +25,7 @@ namespace DPA_Musicsheets.Parsers
             int division = data.Division;
 
             int previousMidiKey = 60; // Central C;
-            song.UnheardStartNote = (SJNote)SetUnheardStartNote(previousMidiKey);
+            song.UnheardStartNote = (SJUnheardNote)SetUnheardStartNote(previousMidiKey);
             song.ClefType = SJClefTypeEnum.Treble;
             int previousNoteAbsoluteTicks = 0;
             double percentageOfBarReached = 0;
@@ -160,19 +160,6 @@ namespace DPA_Musicsheets.Parsers
         private void SetOctave(int previousMidiKey, int midiKey)
         {
             int octave = (midiKey / 12) - 1;
-            //int distance = midiKey - previousMidiKey;
-
-            //while (distance < -6)
-            //{
-            //    octave--;
-            //    distance += 8;
-            //}
-
-            //while (distance > 6)
-            //{
-            //    octave++;
-            //    distance -= 8;
-            //}
 
             SJNoteBuilder.SetOctave(octave);
         }
@@ -238,12 +225,12 @@ namespace DPA_Musicsheets.Parsers
             SJNoteBuilder.SetDuration(EnumConverters.ConvertDoubleToSJNoteDurationEnum(1.0 / duration));
         }
 
-        private SJBaseNote SetUnheardStartNote(int midiPitchValue)
+        private SJUnheardNote SetUnheardStartNote(int midiPitchValue)
         {
             SJNoteBuilder.Prepare("U");
             SetOctave(midiPitchValue, midiPitchValue);
             SetPitchAndAlteration(midiPitchValue);
-            return SJNoteBuilder.Build();
+            return (SJUnheardNote)SJNoteBuilder.Build();
         }
 
         // AddNoteToBar and AddBarIfFull are seperated in favor of Modular Understandibility.

@@ -18,7 +18,6 @@ namespace DPA_Musicsheets.Managers
 
         private SJMidiStateHandler midiStateHandler = new SJMidiStateHandler();
 		private SJMidiParser midiParser = new SJMidiParser();
-        private SJWPFStaffsParser staffsParser = new SJWPFStaffsParser();
 
         public SJSong LoadSong(string fileName)
         {

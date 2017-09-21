@@ -11,10 +11,6 @@ namespace DPA_Musicsheets.Parsers
 {
     public class SJWPFStaffsParser : ISJParser<IEnumerable<MusicalSymbol>>
     {
-        private static List<SJPitchEnum> notesorder = new List<SJPitchEnum> {
-            SJPitchEnum.C, SJPitchEnum.D, SJPitchEnum.E, SJPitchEnum.F, SJPitchEnum.G, SJPitchEnum.A, SJPitchEnum.B
-        };
-
         public IEnumerable<MusicalSymbol> ParseFromSJSong(SJSong song)
         {
             List<MusicalSymbol> symbols = new List<MusicalSymbol>();

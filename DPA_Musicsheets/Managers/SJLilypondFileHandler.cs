@@ -1,4 +1,5 @@
 ﻿using DPA_Musicsheets.Models;
+using DPA_Musicsheets.Parsers;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -10,55 +11,26 @@ namespace DPA_Musicsheets.Managers
 {
     public class SJLilypondFileHandler : ISJFileHandler
     {
+        public string LilypondText;
+        public SJSong Song;
+
         private SJLilypondStateHandler lilypondStateHandler = new SJLilypondStateHandler();
-        // private SJLilypondParser lilypondParser = new SJLilypondParser();
-
-        private string _lilypondText;
-        public string LilypondText
-        {
-            get { return _lilypondText; }
-            set
-            {
-                _lilypondText = value;
-
-                lilypondStateHandler.UpdateData(_lilypondText);
-            }
-        }
+        private SJLilypondParser lilypondParser = new SJLilypondParser();
 
         public SJSong LoadSong(string fileName)
         {
-            if (Path.GetExtension(fileName).EndsWith(".ly"))
+            StringBuilder sb = new StringBuilder();
+            foreach (var line in File.ReadAllLines(fileName))
             {
-                StringBuilder sb = new StringBuilder();
-                foreach (var line in File.ReadAllLines(fileName))
-                {
-                    sb.AppendLine(line);
-                }
-
-                LilypondText = sb.ToString();
-
-                LoadLilypond(sb.ToString());
-
-                return null;
+                sb.AppendLine(line);
             }
-            else
-            {
-                throw new NotSupportedException($"File extension {Path.GetExtension(fileName)} is not supported.");
-            }
-        }
 
-        public void LoadLilypond(string content)
-        {
-            //LilypondText = content;
-            //content = content.Trim().ToLower().Replace("\r\n", " ").Replace("\n", " ").Replace("  ", " ");
-            //LinkedList<LilypondToken> tokens = GetTokensFromLilypond(content);
-            //WPFStaffs.Clear();
-            //string message;
-            //WPFStaffs.AddRange(GetStaffsFromTokens(tokens, out message));
-            //WPFStaffsChanged?.Invoke(this, new WPFStaffsEventArgs() { Symbols = WPFStaffs, Message = message });
+            LilypondText = sb.ToString();
 
-            //MidiSequence = GetSequenceFromWPFStaffs();
-            //MidiSequenceChanged?.Invoke(this, new MidiSequenceEventArgs() { MidiSequence = MidiSequence });
+            
+            lilypondStateHandler.UpdateData(LilypondText);
+            Song = lilypondParser.ParseToSJSong(LilypondText);
+            return Song;
         }
 
     }
