@@ -18,14 +18,13 @@ namespace DPA_Musicsheets.Parsers
 
         public string ParseFromSJSong(SJSong song)
         {
+            int previousOctave = 3;
+            SJPitchEnum previousPitch = SJPitchEnum.C;
             StringBuilder lilypondContent = new StringBuilder();
-            lilypondContent.AppendLine(GetOctaveEntry(song.UnheardStartNote));
+            lilypondContent.AppendLine(GetOctaveEntry(song.UnheardStartNote, ref previousOctave, ref previousPitch));
             lilypondContent.AppendLine(GetClef(song.ClefType));
             lilypondContent.AppendLine(GetTimeSignature(song.TimeSignature));
             lilypondContent.AppendLine(GetTempo(song.Tempo));
-
-            int previousOctave = song.UnheardStartNote.Octave;
-            SJPitchEnum previousPitch = song.UnheardStartNote.Pitch;
             foreach (SJBar bar in song.Bars)
             {
                 lilypondContent.AppendLine(GetBar(bar, ref previousOctave, ref previousPitch));
@@ -218,13 +217,16 @@ namespace DPA_Musicsheets.Parsers
             return pitch;
         }
 
-        private string GetOctaveEntry(SJNote unheardStartNote)
+        private string GetOctaveEntry(SJNote unheardStartNote, ref int previousOctave, ref SJPitchEnum previousPitch)
         {
             string octaveEntry = "\\relative ";
 
             octaveEntry = octaveEntry + unheardStartNote.Pitch.ToString().ToLower();
-
+            octaveEntry = octaveEntry + GetOctaveDifference(unheardStartNote, ref previousOctave, previousPitch);
             octaveEntry = octaveEntry + " {";
+
+            previousPitch = unheardStartNote.Pitch;
+
             return octaveEntry;
 
         }
