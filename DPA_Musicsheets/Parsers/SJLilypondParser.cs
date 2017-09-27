@@ -69,7 +69,8 @@ namespace DPA_Musicsheets.Parsers
                         song.TimeSignature = this.GetSJTimeSignature(lilypondItemString);
                         break;
                     case "\\tempo":
-                        // Tempo is not supported
+                        // Tempo is not supported, therefore default is used.
+                        song.Tempo = 120;
                         break;
                     case "|":
                         song.Bars.Add(currentBar);
