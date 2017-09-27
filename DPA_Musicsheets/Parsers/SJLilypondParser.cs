@@ -119,11 +119,12 @@ namespace DPA_Musicsheets.Parsers
 
         private SJTimeSignature GetSJTimeSignature(string lilypondItemString)
         {
-            SJTimeSignature timeSignature = new SJTimeSignature();
+            SJTimeSignatureBuilder timeSignatureBuilder = new SJTimeSignatureBuilder();
+            timeSignatureBuilder.Prepare();
             var times = lilypondItemString.Split('/');
-            timeSignature.NumberOfBeatsPerBar = uint.Parse(times[0]);
-            timeSignature.NoteValueOfBeat = uint.Parse(times[1]);
-            return timeSignature;
+            timeSignatureBuilder.SetNumberOfBeatsPerBar(uint.Parse(times[0]));
+            timeSignatureBuilder.SetNoteValueOfBeat(uint.Parse(times[1]));
+            return timeSignatureBuilder.Build();
         }
 
         private SJClefTypeEnum GetSJClefType(string lilypondItemString)

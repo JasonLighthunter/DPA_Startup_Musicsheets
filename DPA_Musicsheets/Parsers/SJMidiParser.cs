@@ -82,7 +82,11 @@ namespace DPA_Musicsheets.Parsers
                                     byte[] timeSignatureBytes = metaMessage.GetBytes();
                                     uint _beatNote = timeSignatureBytes[0];
                                     uint _beatsPerBar = (uint)(1 / Math.Pow(timeSignatureBytes[1], -2));
-                                    timeSignature = new SJTimeSignature { NoteValueOfBeat = _beatNote, NumberOfBeatsPerBar = _beatsPerBar };
+                                    SJTimeSignatureBuilder timeSignatureBuilder = new SJTimeSignatureBuilder();
+                                    timeSignatureBuilder.Prepare();
+                                    timeSignatureBuilder.SetNoteValueOfBeat(_beatNote);
+                                    timeSignatureBuilder.SetNumberOfBeatsPerBar(_beatsPerBar);
+                                    timeSignature = timeSignatureBuilder.Build();
                                     songBuilder.SetTimeSignature(timeSignature);
                                     break;
                                 case MetaType.Tempo:
