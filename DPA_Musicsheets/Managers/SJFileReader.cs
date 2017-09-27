@@ -1,6 +1,7 @@
 ﻿using DPA_Musicsheets.Models;
 using DPA_Musicsheets.Parsers;
 using PSAMControlLibrary;
+using Sanford.Multimedia.Midi;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -15,11 +16,13 @@ namespace DPA_Musicsheets.Managers
         private SJFileHandlerFactory _fileHandlerFactory { get; set; }
 
         private SJLilypondParser lilypondParser;
+        private SJMidiParser midiParser;
         private SJWPFStaffsParser staffsParser;
 
         private SJLilypondStateHandler lilypondStateHandler;
+        private SJMidiStateHandler midiStateHandler;
         private SJWPFStaffStateHandler staffsStateHandler;
-        
+
 
         public SJFileReader(SJFileHandlerFactory fileHandlerFactory)
         {
@@ -28,9 +31,11 @@ namespace DPA_Musicsheets.Managers
             _fileHandlerFactory.AddFileHandlerType(".ly", typeof(SJLilypondFileHandler));
 
             lilypondParser = new SJLilypondParser();
+            midiParser = new SJMidiParser();
             staffsParser = new SJWPFStaffsParser();
 
             lilypondStateHandler = new SJLilypondStateHandler();
+            midiStateHandler = new SJMidiStateHandler();
             staffsStateHandler = new SJWPFStaffStateHandler();
         }
 
@@ -42,10 +47,12 @@ namespace DPA_Musicsheets.Managers
                 ISJFileHandler fileHandler = _fileHandlerFactory.CreateFileHandler(fileExtension);
                 SJSong song = fileHandler.LoadSong(fileName);
 
+                Sequence midiSequence = midiParser.ParseFromSJSong(song);
                 string lilypondContent = lilypondParser.ParseFromSJSong(song);
                 IEnumerable<MusicalSymbol> symbols = staffsParser.ParseFromSJSong(song);
 
                 lilypondStateHandler.UpdateData(lilypondContent);
+                midiStateHandler.UpdateData(midiSequence);
                 staffsStateHandler.UpdateData(symbols);
             }
             catch (ArgumentException e)

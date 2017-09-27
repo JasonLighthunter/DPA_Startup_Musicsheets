@@ -7,14 +7,40 @@ using System.Threading.Tasks;
 using DPA_Musicsheets.Models;
 using DPA_Musicsheets.Managers;
 using DPA_Musicsheets.Utility;
+using PSAMControlLibrary;
 
 namespace DPA_Musicsheets.Parsers
 {
     class SJMidiParser : ISJParser<Sequence>
     {
+        private List<string> notesOrderWithCrosses = new List<string>() { "c", "cis", "d", "dis", "e", "f", "fis", "g", "gis", "a", "ais", "b" };
+        private int absoluteTicks = 0;
         public Sequence ParseFromSJSong(SJSong song)
         {
-            throw new NotImplementedException();
+            int bpm = 120;
+
+            Sequence midiSequence = new Sequence();
+
+            Track metaTrack = new Track();
+            midiSequence.Add(metaTrack);
+
+            // Calculate tempo
+            byte[] tempo = GetMidiTempo(song.Tempo);
+            metaTrack.Insert(0 /* Insert at 0 ticks*/, new MetaMessage(MetaType.Tempo, tempo));
+
+
+            byte[] timeSignature = GetMidiTimeSignature(song.TimeSignature);
+            metaTrack.Insert(absoluteTicks, new MetaMessage(MetaType.TimeSignature, timeSignature));
+
+            Track notesTrack = new Track();
+
+            FillNotesTrackWithBars(song.Bars, song.TimeSignature.NoteValueOfBeat, midiSequence.Division, ref notesTrack);
+
+            midiSequence.Add(notesTrack);
+
+            notesTrack.Insert(absoluteTicks, MetaMessage.EndOfTrackMessage);
+            metaTrack.Insert(absoluteTicks, MetaMessage.EndOfTrackMessage);
+            return midiSequence;
         }
 
         public SJSong ParseToSJSong(Sequence data)
@@ -154,6 +180,65 @@ namespace DPA_Musicsheets.Parsers
                 case 11:
                     SJNoteBuilder.SetPitch(SJPitchEnum.B);
                     break;
+            }
+        }
+
+        private byte[] GetMidiTempo(ulong songTempo)
+        {
+            int speed = (int)(60000000 / songTempo);
+            byte[] tempo = new byte[3];
+            tempo[0] = (byte)((speed >> 16) & 0xff);
+            tempo[1] = (byte)((speed >> 8) & 0xff);
+            tempo[2] = (byte)(speed & 0xff);
+            return tempo;
+        }
+
+        private byte[] GetMidiTimeSignature(SJTimeSignature songTimeSignature)
+        {
+            byte[] timeSignature = new byte[4];
+            timeSignature[0] = (byte)songTimeSignature.NumberOfBeatsPerBar;
+            timeSignature[1] = (byte)(Math.Log(songTimeSignature.NoteValueOfBeat) / Math.Log(2));
+            return timeSignature;
+        }
+
+        private void FillNotesTrackWithBars(List<SJBar> bars, uint noteValueOfBeat, int midiDivision, ref Track notesTrack)
+        {
+            foreach(SJBar bar in bars)
+            {
+                FillNotesTrackWithNotes(bar.Notes, noteValueOfBeat, midiDivision, ref notesTrack);
+            }
+        }
+
+        private void FillNotesTrackWithNotes(List<SJBaseNote> notes, uint noteValueOfBeat, int midiDivision, ref Track notesTrack)
+        {
+            foreach (SJBaseNote tempNote in notes)
+            {
+
+                // Calculate duration
+                double absoluteLength = (EnumConverters.ConvertSJNoteDurationEnumToDouble(tempNote.Duration));
+                absoluteLength += (absoluteLength / 2.0) * tempNote.NumberOfDots;
+
+                double relationToQuartNote = noteValueOfBeat / 4.0;
+                double percentageOfBeatNote = (1.0 / noteValueOfBeat) / absoluteLength;
+                double deltaTicks = (midiDivision / relationToQuartNote) / percentageOfBeatNote;
+
+                int noteHeight = 0;
+                int volume = 0;
+                if (tempNote is SJNote)
+                {
+                    // Calculate height
+                    int octave = ((SJNote)tempNote).Octave + 1;
+                    int pitchValue = notesOrderWithCrosses.IndexOf(((SJNote)tempNote).Pitch.ToString().ToLower());
+                    noteHeight = pitchValue + octave * 12;
+                    noteHeight += ((SJNote)tempNote).PitchAlteration;
+
+                    volume = 90;
+                }
+
+                notesTrack.Insert(absoluteTicks, new ChannelMessage(ChannelCommand.NoteOn, 1, noteHeight, volume)); // Data2 = volume
+
+                absoluteTicks += (int)deltaTicks;
+                notesTrack.Insert(absoluteTicks, new ChannelMessage(ChannelCommand.NoteOn, 1, noteHeight, 0)); // Data2 = volume
             }
         }
 
