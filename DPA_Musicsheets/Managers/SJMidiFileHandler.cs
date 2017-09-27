@@ -17,14 +17,19 @@ namespace DPA_Musicsheets.Managers
 		public SJSong Song { get; set; }
 
         private SJMidiStateHandler midiStateHandler = new SJMidiStateHandler();
-		private SJMidiParser midiParser = new SJMidiParser();
+		private SJMidiParser _midiParser;
+
+        public SJMidiFileHandler(SJMidiParser midiParser)
+        {
+            _midiParser = midiParser;
+        }
 
         public SJSong LoadSong(string fileName)
         {
             MidiSequence = new Sequence();
             MidiSequence.Load(fileName);
             midiStateHandler.UpdateData(MidiSequence);
-			Song = midiParser.ParseToSJSong(MidiSequence);
+			Song = _midiParser.ParseToSJSong(MidiSequence);
             return Song;
         }
     }

@@ -105,6 +105,7 @@
     </ApplicationDefinition>
     <Compile Include="Builders\SJBarBuilder.cs" />
     <Compile Include="Builders\SJSongBuilder.cs" />
+    <Compile Include="Builders\SJTimeSignatureBuilder.cs" />
     <Compile Include="Managers\ISJFileHandler.cs" />
     <Compile Include="Managers\ISJStateHandler.cs" />
     <Compile Include="Managers\MidiSequenceEventArgs.cs" />
@@ -114,8 +115,8 @@
     <Compile Include="Managers\SJLilypondStateHandler.cs" />
     <Compile Include="Managers\SJMidiFileHandler.cs" />
     <Compile Include="Managers\SJMidiStateHandler.cs" />
-    <Compile Include="Managers\SJNoteBuilder.cs" />
-    <Compile Include="Managers\SJNoteFactory.cs" />
+    <Compile Include="Builders\SJNoteBuilder.cs" />
+    <Compile Include="Builders\SJNoteFactory.cs" />
     <Compile Include="Managers\SJWPFStaffStateHandler.cs" />
     <Compile Include="Managers\WPFStaffsEventArgs.cs" />
     <Compile Include="Managers\LilypondEventArgs.cs" />

@@ -2,27 +2,29 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using DPA_Musicsheets.Managers;
 using DPA_Musicsheets.Models;
+using DPA_Musicsheets.Builders;
 
 namespace DPA_Musicsheets_Test
 {
     [TestClass]
     public class NoteFactoryTests
     {
-        //private SJNoteFactory factory;
+        private SJNoteFactory factory { get; set; }
 
         [TestInitialize]
         public void CreateFactory()
         {
-            //factory = new SJNoteFactory();
-			SJNoteFactory.AddNoteType("N", typeof(SJNote));
-			SJNoteFactory.AddNoteType("R", typeof(SJRest));
+            factory = new SJNoteFactory();
+            factory.AddNoteType("N", typeof(SJNote));
+            factory.AddNoteType("R", typeof(SJRest));
+            factory.AddNoteType("U", typeof(SJUnheardNote));
         }
 
         [TestMethod]
         public void CreateNotePositive()
         {
             string value = "N";
-            SJBaseNote note = SJNoteFactory.CreateNote(value);
+            SJBaseNote note = factory.CreateNote(value);
             Assert.IsNotNull(note);
             Assert.IsInstanceOfType(note, typeof(SJNote));
         }
@@ -31,7 +33,7 @@ namespace DPA_Musicsheets_Test
         public void CreateRestPositive()
         {
             string value = "R";
-            SJBaseNote note = SJNoteFactory.CreateNote(value);
+            SJBaseNote note = factory.CreateNote(value);
             Assert.IsNotNull(note);
             Assert.IsInstanceOfType(note, typeof(SJRest));
         }
@@ -41,14 +43,14 @@ namespace DPA_Musicsheets_Test
         public void CreateNoteNegativeWhitespace()
         {
             string value = " ";
-            SJBaseNote note = SJNoteFactory.CreateNote(value);
+            SJBaseNote note = factory.CreateNote(value);
         }
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentException), "An null was inappropriately allowed.")]
         public void CreateNoteNegativeNull()
         {
-            SJBaseNote note = SJNoteFactory.CreateNote(null);
+            SJBaseNote note = factory.CreateNote(null);
         }
 
         [TestMethod]
@@ -56,7 +58,7 @@ namespace DPA_Musicsheets_Test
         public void CreateNoteNegativeUnknown()
         {
             string value = "Q";
-            SJBaseNote note = SJNoteFactory.CreateNote(value);
+            SJBaseNote note = factory.CreateNote(value);
         }
     }
 }

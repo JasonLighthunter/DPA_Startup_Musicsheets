@@ -1,7 +1,11 @@
-﻿using DPA_Musicsheets.Managers;
+﻿using DPA_Musicsheets.Builders;
+using DPA_Musicsheets.Managers;
+using DPA_Musicsheets.Models;
+using DPA_Musicsheets.Parsers;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Ioc;
 using Microsoft.Practices.ServiceLocation;
+using System;
 
 namespace DPA_Musicsheets.ViewModels
 {
@@ -12,8 +16,24 @@ namespace DPA_Musicsheets.ViewModels
             ServiceLocator.SetLocatorProvider(() => SimpleIoc.Default);
 
             SimpleIoc.Default.Register<FileHandler>();
-			SimpleIoc.Default.Register<SJFileReader>();
-			SimpleIoc.Default.Register<SJFileHandlerFactory>();
+
+            SimpleIoc.Default.Register<SJNoteFactory>();
+            SimpleIoc.Default.Register<SJNoteBuilder>();
+
+            SimpleIoc.Default.Register<SJLilypondFileHandler>();
+            SimpleIoc.Default.Register<SJMidiFileHandler>();
+
+            //noteFactory.AddNoteType("R", typeof(SJRest));
+            //noteFactory.AddNoteType("N", typeof(SJNote));
+            //noteFactory.AddNoteType("U", typeof(SJUnheardNote));
+
+            SimpleIoc.Default.Register<SJLilypondParser>();
+            SimpleIoc.Default.Register<SJMidiParser>();
+            SimpleIoc.Default.Register<SJWPFStaffsParser>();
+
+            SimpleIoc.Default.Register<SJFileHandlerFactory>();
+
+            SimpleIoc.Default.Register<SJFileReader>();
 
             SimpleIoc.Default.Register<MainViewModel>();
             SimpleIoc.Default.Register<LilypondViewModel>();
