@@ -8,11 +8,19 @@ using DPA_Musicsheets.Models;
 using DPA_Musicsheets.Managers;
 using DPA_Musicsheets.Utility;
 using PSAMControlLibrary;
+using DPA_Musicsheets.Builders;
 
 namespace DPA_Musicsheets.Parsers
 {
-    class SJMidiParser : ISJParser<Sequence>
+    public class SJMidiParser : ISJParser<Sequence>
     {
+        private SJNoteBuilder _noteBuilder { get; set; }
+
+        public SJMidiParser(SJNoteBuilder noteBuilder)
+        {
+            this._noteBuilder = noteBuilder;
+        }
+
         private List<string> notesOrderWithCrosses = new List<string>() { "c", "cis", "d", "dis", "e", "f", "fis", "g", "gis", "a", "ais", "b" };
         private int absoluteTicks = 0;
         public Sequence ParseFromSJSong(SJSong song)
@@ -45,14 +53,21 @@ namespace DPA_Musicsheets.Parsers
 
         public SJSong ParseToSJSong(Sequence data)
         {
-            SJSong song = new SJSong();
-            SJBar bar = new SJBar();
+            SJSongBuilder songBuilder = new SJSongBuilder();
+            SJBarBuilder barBuilder = new SJBarBuilder();
+            SJTimeSignatureBuilder timeSignatureBuilder = new SJTimeSignatureBuilder();
+
+            songBuilder.Prepare();
+            barBuilder.Prepare();
+
+            //SJBar bar = new SJBar();
+            SJTimeSignature timeSignature = null;
 
             int division = data.Division;
 
             int previousMidiKey = 60; // Central C;
-            song.UnheardStartNote = (SJUnheardNote)SetUnheardStartNote(previousMidiKey);
-            song.ClefType = SJClefTypeEnum.Treble;
+            songBuilder.SetUnheardStartNote(SetUnheardStartNote(previousMidiKey));
+            songBuilder.SetClefType(SJClefTypeEnum.Treble);
             int previousNoteAbsoluteTicks = 0;
             double percentageOfBarReached = 0;
             bool startedNoteIsClosed = true;
@@ -75,14 +90,18 @@ namespace DPA_Musicsheets.Parsers
                                     byte[] timeSignatureBytes = metaMessage.GetBytes();
                                     uint _beatNote = timeSignatureBytes[0];
                                     uint _beatsPerBar = (uint)(1 / Math.Pow(timeSignatureBytes[1], -2));
-                                    song.TimeSignature = new SJTimeSignature { NoteValueOfBeat = _beatNote, NumberOfBeatsPerBar = _beatsPerBar };
+                                    timeSignatureBuilder.Prepare();
+                                    timeSignatureBuilder.SetNoteValueOfBeat(_beatNote);
+                                    timeSignatureBuilder.SetNumberOfBeatsPerBar(_beatsPerBar);
+                                    timeSignature = timeSignatureBuilder.Build();
+                                    songBuilder.SetTimeSignature(timeSignature);
                                     break;
                                 case MetaType.Tempo:
                                     Console.WriteLine("=== Creating Tempo");
                                     byte[] tempoBytes = metaMessage.GetBytes();
                                     long tempo = (tempoBytes[0] & 0xff) << 16 | (tempoBytes[1] & 0xff) << 8 | (tempoBytes[2] & 0xff);
                                     ulong _bpm = (ulong)(60000000 / tempo);
-                                    song.Tempo = _bpm;
+                                    songBuilder.SetTempo(_bpm);
                                     break;
                                 case MetaType.EndOfTrack: //magic
                                     Console.WriteLine("=== Creating endOf Track");
@@ -90,8 +109,8 @@ namespace DPA_Musicsheets.Parsers
                                     {
                                         // Finish the last notelength.
                                         //TODO goed kijken naar het toevoegen van de laatste Bar aan Song
-                                        AddNoteToBar(ref song, ref bar, previousNoteAbsoluteTicks, midiEvent.AbsoluteTicks, division, ref percentageOfBarReached);
-                                        AddBarIfFull(ref song, ref bar, ref percentageOfBarReached);
+                                        AddNoteToBar(timeSignature, barBuilder, previousNoteAbsoluteTicks, midiEvent.AbsoluteTicks, division, ref percentageOfBarReached);
+                                        AddBarIfFull(songBuilder, barBuilder, ref percentageOfBarReached);
                                     }
                                     break;
                                 default:
@@ -106,7 +125,7 @@ namespace DPA_Musicsheets.Parsers
                                 if (channelMessage.Data2 > 0) // Data2 = loudness
                                 {
                                     Console.WriteLine("===@ Creating Octave and Pitch");
-                                    SJNoteBuilder.Prepare("N");
+                                    _noteBuilder.Prepare("N");
                                     SetPitchAndAlteration(channelMessage.Data1);
                                     SetOctave(previousMidiKey, channelMessage.Data1);
 
@@ -115,8 +134,8 @@ namespace DPA_Musicsheets.Parsers
                                 }
                                 else if (!startedNoteIsClosed)
                                 {
-                                    AddNoteToBar(ref song, ref bar, previousNoteAbsoluteTicks, midiEvent.AbsoluteTicks, division, ref percentageOfBarReached);
-                                    AddBarIfFull(ref song, ref bar, ref percentageOfBarReached);
+                                    AddNoteToBar(timeSignature, barBuilder, previousNoteAbsoluteTicks, midiEvent.AbsoluteTicks, division, ref percentageOfBarReached);
+                                    AddBarIfFull(songBuilder, barBuilder, ref percentageOfBarReached);
 
                                     previousNoteAbsoluteTicks = midiEvent.AbsoluteTicks;
                                     startedNoteIsClosed = true;
@@ -124,15 +143,14 @@ namespace DPA_Musicsheets.Parsers
                                 else
                                 {
                                     Console.WriteLine("===@ Preparing Rest");
-                                    SJNoteBuilder.Prepare("R");
+                                    _noteBuilder.Prepare("R");
                                 }
                             }
                             break;
                     }
                 }
             }
-            //throw new NotImplementedException();
-            return song;
+            return songBuilder.Build();
         }
 
         private void SetPitchAndAlteration(int midiKey)
@@ -140,45 +158,45 @@ namespace DPA_Musicsheets.Parsers
             switch (midiKey % 12)
             {
                 case 0:
-                    SJNoteBuilder.SetPitch(SJPitchEnum.C);
+                    _noteBuilder.SetPitch(SJPitchEnum.C);
                     break;
                 case 1:
-                    SJNoteBuilder.SetPitch(SJPitchEnum.C);
-                    SJNoteBuilder.SetPitchAlteration(1);
+                    _noteBuilder.SetPitch(SJPitchEnum.C);
+                    _noteBuilder.SetPitchAlteration(1);
                     break;
                 case 2:
-                    SJNoteBuilder.SetPitch(SJPitchEnum.D);
+                    _noteBuilder.SetPitch(SJPitchEnum.D);
                     break;
                 case 3:
-                    SJNoteBuilder.SetPitch(SJPitchEnum.D);
-                    SJNoteBuilder.SetPitchAlteration(1);
+                    _noteBuilder.SetPitch(SJPitchEnum.D);
+                    _noteBuilder.SetPitchAlteration(1);
                     break;
                 case 4:
-                    SJNoteBuilder.SetPitch(SJPitchEnum.E);
+                    _noteBuilder.SetPitch(SJPitchEnum.E);
                     break;
                 case 5:
-                    SJNoteBuilder.SetPitch(SJPitchEnum.F);
+                    _noteBuilder.SetPitch(SJPitchEnum.F);
                     break;
                 case 6:
-                    SJNoteBuilder.SetPitch(SJPitchEnum.F);
-                    SJNoteBuilder.SetPitchAlteration(1);
+                    _noteBuilder.SetPitch(SJPitchEnum.F);
+                    _noteBuilder.SetPitchAlteration(1);
                     break;
                 case 7:
-                    SJNoteBuilder.SetPitch(SJPitchEnum.G);
+                    _noteBuilder.SetPitch(SJPitchEnum.G);
                     break;
                 case 8:
-                    SJNoteBuilder.SetPitch(SJPitchEnum.G);
-                    SJNoteBuilder.SetPitchAlteration(1);
+                    _noteBuilder.SetPitch(SJPitchEnum.G);
+                    _noteBuilder.SetPitchAlteration(1);
                     break;
                 case 9:
-                    SJNoteBuilder.SetPitch(SJPitchEnum.A);
+                    _noteBuilder.SetPitch(SJPitchEnum.A);
                     break;
                 case 10:
-                    SJNoteBuilder.SetPitch(SJPitchEnum.A);
-                    SJNoteBuilder.SetPitchAlteration(1);
+                    _noteBuilder.SetPitch(SJPitchEnum.A);
+                    _noteBuilder.SetPitchAlteration(1);
                     break;
                 case 11:
-                    SJNoteBuilder.SetPitch(SJPitchEnum.B);
+                    _noteBuilder.SetPitch(SJPitchEnum.B);
                     break;
             }
         }
@@ -246,7 +264,7 @@ namespace DPA_Musicsheets.Parsers
         {
             int octave = (midiKey / 12) - 1;
 
-            SJNoteBuilder.SetOctave(octave);
+            _noteBuilder.SetOctave(octave);
         }
 
         private void SetDotsAndDuration(SJTimeSignature timeSignature, int absoluteTicks, int nextNoteAbsoluteTicks, int division, out double percentageOfBar)
@@ -306,37 +324,37 @@ namespace DPA_Musicsheets.Parsers
                 }
             }
 
-            SJNoteBuilder.SetNumberOfDots(dots);
-            SJNoteBuilder.SetDuration(EnumConverters.ConvertDoubleToSJNoteDurationEnum(1.0 / duration));
+            _noteBuilder.SetNumberOfDots(dots);
+            _noteBuilder.SetDuration(EnumConverters.ConvertDoubleToSJNoteDurationEnum(1.0 / duration));
         }
 
         private SJUnheardNote SetUnheardStartNote(int midiPitchValue)
         {
-            SJNoteBuilder.Prepare("U");
+            _noteBuilder.Prepare("U");
             SetOctave(midiPitchValue, midiPitchValue);
             SetPitchAndAlteration(midiPitchValue);
-            return (SJUnheardNote)SJNoteBuilder.Build();
+            return (SJUnheardNote)_noteBuilder.Build();
         }
 
         // AddNoteToBar and AddBarIfFull are seperated in favor of Modular Understandibility.
-        private void AddNoteToBar(ref SJSong song, ref SJBar bar, int previousNoteAbsoluteTicks, int currentNoteAbsoluteTicks, int division, ref double percentageOfBarReached)
+        private void AddNoteToBar(SJTimeSignature timeSignature, SJBarBuilder barBuilder, int previousNoteAbsoluteTicks, int currentNoteAbsoluteTicks, int division, ref double percentageOfBarReached)
         {
             double percentageOfBar;
 
-            SetDotsAndDuration(song.TimeSignature, previousNoteAbsoluteTicks, currentNoteAbsoluteTicks, division, out percentageOfBar);
-            bar.Notes.Add(SJNoteBuilder.Build());
+            SetDotsAndDuration(timeSignature, previousNoteAbsoluteTicks, currentNoteAbsoluteTicks, division, out percentageOfBar);
+            barBuilder.AddNote(_noteBuilder.Build());
 
             percentageOfBarReached += percentageOfBar;
         }
 
-        private void AddBarIfFull(ref SJSong song, ref SJBar bar, ref double percentageOfBarReached)
+        private void AddBarIfFull(SJSongBuilder songBuilder, SJBarBuilder barBuilder, ref double percentageOfBarReached)
         {
             if (percentageOfBarReached >= 1)
             {
                 //SJBar newBar = bar;
                 //song.Bars.Add(newBar);
-                song.Bars.Add(bar);
-                bar = new SJBar();
+                songBuilder.AddBar(barBuilder.Build());
+                barBuilder.Prepare();
                 //bar.Notes.Clear();
                 percentageOfBarReached -= 1;
             }

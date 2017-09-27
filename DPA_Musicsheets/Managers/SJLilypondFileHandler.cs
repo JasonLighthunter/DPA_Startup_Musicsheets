@@ -15,7 +15,12 @@ namespace DPA_Musicsheets.Managers
         public SJSong Song;
 
         private SJLilypondStateHandler lilypondStateHandler = new SJLilypondStateHandler();
-        private SJLilypondParser lilypondParser = new SJLilypondParser();
+        private SJLilypondParser _lilypondParser;
+
+        public SJLilypondFileHandler(SJLilypondParser lilypondParser)
+        {
+            _lilypondParser = lilypondParser;
+        }
 
         public SJSong LoadSong(string fileName)
         {
@@ -29,7 +34,7 @@ namespace DPA_Musicsheets.Managers
 
             
             lilypondStateHandler.UpdateData(LilypondText);
-            Song = lilypondParser.ParseToSJSong(LilypondText);
+            Song = _lilypondParser.ParseToSJSong(LilypondText);
             return Song;
         }
 

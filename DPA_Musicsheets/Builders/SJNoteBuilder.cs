@@ -5,19 +5,27 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DPA_Musicsheets.Managers
+namespace DPA_Musicsheets.Builders
 {
-    public static class SJNoteBuilder
+    public class SJNoteBuilder
     {
-//        private static SJNoteFactory factory;
-        public static SJBaseNote note;
+        private SJNoteFactory _noteFactory;
+        public SJBaseNote note;
 
-        public static void Prepare(string value)
+        public SJNoteBuilder(SJNoteFactory noteFactory)
         {
-            note = SJNoteFactory.CreateNote(value);
+            _noteFactory = noteFactory;
+            _noteFactory.AddNoteType("R", typeof(SJRest));
+            _noteFactory.AddNoteType("N", typeof(SJNote));
+            _noteFactory.AddNoteType("U", typeof(SJUnheardNote));
         }
 
-        public static void SetPitch(SJPitchEnum pitch)
+        public void Prepare(string value)
+        {
+            note = _noteFactory.CreateNote(value);
+        }
+
+        public void SetPitch(SJPitchEnum pitch)
         {
             if(note is SJNote)
             {
@@ -25,7 +33,7 @@ namespace DPA_Musicsheets.Managers
             }
         }
 
-        public static void SetPitchAlteration(int pitchAlteration)
+        public void SetPitchAlteration(int pitchAlteration)
         {
             if (note is SJNote)
             {
@@ -33,7 +41,7 @@ namespace DPA_Musicsheets.Managers
             }
         }
 
-        public static void SetOctave(int octave)
+        public void SetOctave(int octave)
         {
             if (note is SJNote)
             {
@@ -41,17 +49,17 @@ namespace DPA_Musicsheets.Managers
             }
         }
 
-        public static void SetNumberOfDots(uint numberofDots)
+        public void SetNumberOfDots(uint numberofDots)
         {
             note.NumberOfDots = numberofDots;
         }
 
-        public static void SetDuration(SJNoteDurationEnum duration)
+        public void SetDuration(SJNoteDurationEnum duration)
         {
             note.Duration = duration;
         }
 
-        public static SJBaseNote Build()
+        public SJBaseNote Build()
         {
             if (note != null && (note.Duration != SJNoteDurationEnum.Undefined || note is SJUnheardNote))
             {

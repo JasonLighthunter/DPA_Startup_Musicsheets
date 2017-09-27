@@ -17,8 +17,6 @@ namespace MidiPlayerTest
     {
         protected override void OnStartup(StartupEventArgs e)
         {
-            SJNoteFactory.AddNoteType("R", typeof(SJRest));
-            SJNoteFactory.AddNoteType("N", typeof(SJNote));
             base.OnStartup(e);
         }
     }

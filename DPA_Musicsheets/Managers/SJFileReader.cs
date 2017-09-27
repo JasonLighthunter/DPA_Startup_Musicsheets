@@ -13,26 +13,30 @@ namespace DPA_Musicsheets.Managers
 {
     public class SJFileReader
     {
-        private SJFileHandlerFactory _fileHandlerFactory { get; set; }
+        //private SJFileHandlerFactory _fileHandlerFactory { get; set; }
+        private ISJFileHandler _midiFileHandler { get; set; }
+        private ISJFileHandler _lilypondFileHandler { get; set; }
 
-        private SJLilypondParser lilypondParser;
-        private SJMidiParser midiParser;
-        private SJWPFStaffsParser staffsParser;
+        private SJLilypondParser _lilypondParser;
+        private SJMidiParser _midiParser;
+        private SJWPFStaffsParser _staffsParser;
 
         private SJLilypondStateHandler lilypondStateHandler;
         private SJMidiStateHandler midiStateHandler;
         private SJWPFStaffStateHandler staffsStateHandler;
 
-
-        public SJFileReader(SJFileHandlerFactory fileHandlerFactory)
+        public SJFileReader(SJMidiFileHandler midiFileHandler, SJLilypondFileHandler lilypondFileHandler, SJLilypondParser lilypondParser, SJMidiParser midiParser, SJWPFStaffsParser staffsParser)
         {
-            _fileHandlerFactory = fileHandlerFactory;
-			_fileHandlerFactory.AddFileHandlerType(".mid", typeof(SJMidiFileHandler));
-            _fileHandlerFactory.AddFileHandlerType(".ly", typeof(SJLilypondFileHandler));
+            //         _fileHandlerFactory = fileHandlerFactory;
+            //_fileHandlerFactory.AddFileHandlerType(".mid", typeof(SJMidiFileHandler));
+            //         _fileHandlerFactory.AddFileHandlerType(".ly", typeof(SJLilypondFileHandler));
 
-            lilypondParser = new SJLilypondParser();
-            midiParser = new SJMidiParser();
-            staffsParser = new SJWPFStaffsParser();
+            _midiFileHandler = midiFileHandler;
+            _lilypondFileHandler = lilypondFileHandler;
+
+            _lilypondParser = lilypondParser;
+            _midiParser = midiParser;
+            _staffsParser = staffsParser;
 
             lilypondStateHandler = new SJLilypondStateHandler();
             midiStateHandler = new SJMidiStateHandler();
@@ -44,12 +48,24 @@ namespace DPA_Musicsheets.Managers
             string fileExtension = Path.GetExtension(fileName);
             try
             {
-                ISJFileHandler fileHandler = _fileHandlerFactory.CreateFileHandler(fileExtension);
-                SJSong song = fileHandler.LoadSong(fileName);
+                //ISJFileHandler fileHandler = _fileHandlerFactory.CreateFileHandler(fileExtension);
+                SJSong song = new SJSong();
+                switch (fileExtension)
+                {
+                    case ".mid":
+                        song = _midiFileHandler.LoadSong(fileName);
+                        break;
+                    case ".ly":
+                        song = _lilypondFileHandler.LoadSong(fileName);
+                        break;
+                    default:
+                        break;
+                }
+                 
 
-                Sequence midiSequence = midiParser.ParseFromSJSong(song);
-                string lilypondContent = lilypondParser.ParseFromSJSong(song);
-                IEnumerable<MusicalSymbol> symbols = staffsParser.ParseFromSJSong(song);
+                Sequence midiSequence = _midiParser.ParseFromSJSong(song);
+                string lilypondContent = _lilypondParser.ParseFromSJSong(song);
+                IEnumerable<MusicalSymbol> symbols = _staffsParser.ParseFromSJSong(song);
 
                 lilypondStateHandler.UpdateData(lilypondContent);
                 midiStateHandler.UpdateData(midiSequence);

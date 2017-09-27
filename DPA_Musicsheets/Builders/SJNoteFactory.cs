@@ -5,18 +5,18 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DPA_Musicsheets.Managers
+namespace DPA_Musicsheets.Builders
 {
-    public static class SJNoteFactory
+    public class SJNoteFactory
     {
-        private static Dictionary<string, Type> _types = new Dictionary<string, Type>();
+        private Dictionary<string, Type> _types = new Dictionary<string, Type>();
 
-        public static void AddNoteType(string name, Type type)
+        public void AddNoteType(string name, Type type)
         {
             _types[name] = type;
         }
 
-        public static SJBaseNote CreateNote(string type)
+        public SJBaseNote CreateNote(string type)
         {
             if (string.IsNullOrWhiteSpace(type) || !_types.ContainsKey(type))
             {

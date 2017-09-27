@@ -33,9 +33,6 @@ namespace DPA_Musicsheets
     {
         public MainWindow()
         {
-            SJNoteFactory.AddNoteType("R", typeof(SJRest));
-            SJNoteFactory.AddNoteType("N", typeof(SJNote));
-            SJNoteFactory.AddNoteType("U", typeof(SJUnheardNote));
             InitializeComponent();
         }
     }
