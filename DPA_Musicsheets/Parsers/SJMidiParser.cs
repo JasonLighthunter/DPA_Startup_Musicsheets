@@ -8,6 +8,7 @@ using DPA_Musicsheets.Models;
 using DPA_Musicsheets.Managers;
 using DPA_Musicsheets.Utility;
 using PSAMControlLibrary;
+using DPA_Musicsheets.Builders;
 
 namespace DPA_Musicsheets.Parsers
 {
@@ -45,14 +46,16 @@ namespace DPA_Musicsheets.Parsers
 
         public SJSong ParseToSJSong(Sequence data)
         {
-            SJSong song = new SJSong();
+            SJSongBuilder songBuilder = new SJSongBuilder();
+            songBuilder.Prepare();
             SJBar bar = new SJBar();
+            SJTimeSignature timeSignature = new SJTimeSignature();
 
             int division = data.Division;
 
             int previousMidiKey = 60; // Central C;
-            song.UnheardStartNote = (SJUnheardNote)SetUnheardStartNote(previousMidiKey);
-            song.ClefType = SJClefTypeEnum.Treble;
+            songBuilder.SetUnheardStartNote(SetUnheardStartNote(previousMidiKey));
+            songBuilder.SetClefType(SJClefTypeEnum.Treble);
             int previousNoteAbsoluteTicks = 0;
             double percentageOfBarReached = 0;
             bool startedNoteIsClosed = true;
@@ -75,14 +78,15 @@ namespace DPA_Musicsheets.Parsers
                                     byte[] timeSignatureBytes = metaMessage.GetBytes();
                                     uint _beatNote = timeSignatureBytes[0];
                                     uint _beatsPerBar = (uint)(1 / Math.Pow(timeSignatureBytes[1], -2));
-                                    song.TimeSignature = new SJTimeSignature { NoteValueOfBeat = _beatNote, NumberOfBeatsPerBar = _beatsPerBar };
+                                    timeSignature = new SJTimeSignature { NoteValueOfBeat = _beatNote, NumberOfBeatsPerBar = _beatsPerBar };
+                                    songBuilder.SetTimeSignature(timeSignature);
                                     break;
                                 case MetaType.Tempo:
                                     Console.WriteLine("=== Creating Tempo");
                                     byte[] tempoBytes = metaMessage.GetBytes();
                                     long tempo = (tempoBytes[0] & 0xff) << 16 | (tempoBytes[1] & 0xff) << 8 | (tempoBytes[2] & 0xff);
                                     ulong _bpm = (ulong)(60000000 / tempo);
-                                    song.Tempo = _bpm;
+                                    songBuilder.SetTempo(_bpm);
                                     break;
                                 case MetaType.EndOfTrack: //magic
                                     Console.WriteLine("=== Creating endOf Track");
@@ -90,8 +94,8 @@ namespace DPA_Musicsheets.Parsers
                                     {
                                         // Finish the last notelength.
                                         //TODO goed kijken naar het toevoegen van de laatste Bar aan Song
-                                        AddNoteToBar(ref song, ref bar, previousNoteAbsoluteTicks, midiEvent.AbsoluteTicks, division, ref percentageOfBarReached);
-                                        AddBarIfFull(ref song, ref bar, ref percentageOfBarReached);
+                                        AddNoteToBar(timeSignature, ref bar, previousNoteAbsoluteTicks, midiEvent.AbsoluteTicks, division, ref percentageOfBarReached);
+                                        AddBarIfFull(songBuilder, ref bar, ref percentageOfBarReached);
                                     }
                                     break;
                                 default:
@@ -115,8 +119,8 @@ namespace DPA_Musicsheets.Parsers
                                 }
                                 else if (!startedNoteIsClosed)
                                 {
-                                    AddNoteToBar(ref song, ref bar, previousNoteAbsoluteTicks, midiEvent.AbsoluteTicks, division, ref percentageOfBarReached);
-                                    AddBarIfFull(ref song, ref bar, ref percentageOfBarReached);
+                                    AddNoteToBar(timeSignature, ref bar, previousNoteAbsoluteTicks, midiEvent.AbsoluteTicks, division, ref percentageOfBarReached);
+                                    AddBarIfFull(songBuilder, ref bar, ref percentageOfBarReached);
 
                                     previousNoteAbsoluteTicks = midiEvent.AbsoluteTicks;
                                     startedNoteIsClosed = true;
@@ -132,7 +136,7 @@ namespace DPA_Musicsheets.Parsers
                 }
             }
             //throw new NotImplementedException();
-            return song;
+            return songBuilder.Build();
         }
 
         private void SetPitchAndAlteration(int midiKey)
@@ -319,23 +323,23 @@ namespace DPA_Musicsheets.Parsers
         }
 
         // AddNoteToBar and AddBarIfFull are seperated in favor of Modular Understandibility.
-        private void AddNoteToBar(ref SJSong song, ref SJBar bar, int previousNoteAbsoluteTicks, int currentNoteAbsoluteTicks, int division, ref double percentageOfBarReached)
+        private void AddNoteToBar(SJTimeSignature timeSignature, ref SJBar bar, int previousNoteAbsoluteTicks, int currentNoteAbsoluteTicks, int division, ref double percentageOfBarReached)
         {
             double percentageOfBar;
 
-            SetDotsAndDuration(song.TimeSignature, previousNoteAbsoluteTicks, currentNoteAbsoluteTicks, division, out percentageOfBar);
+            SetDotsAndDuration(timeSignature, previousNoteAbsoluteTicks, currentNoteAbsoluteTicks, division, out percentageOfBar);
             bar.Notes.Add(SJNoteBuilder.Build());
 
             percentageOfBarReached += percentageOfBar;
         }
 
-        private void AddBarIfFull(ref SJSong song, ref SJBar bar, ref double percentageOfBarReached)
+        private void AddBarIfFull(SJSongBuilder songBuilder, ref SJBar bar, ref double percentageOfBarReached)
         {
             if (percentageOfBarReached >= 1)
             {
                 //SJBar newBar = bar;
                 //song.Bars.Add(newBar);
-                song.Bars.Add(bar);
+                songBuilder.AddBar(bar);
                 bar = new SJBar();
                 //bar.Notes.Clear();
                 percentageOfBarReached -= 1;

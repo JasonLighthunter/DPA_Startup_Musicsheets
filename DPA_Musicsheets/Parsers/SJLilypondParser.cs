@@ -7,6 +7,7 @@ using DPA_Musicsheets.Models;
 using DPA_Musicsheets.Utility;
 using System.Text.RegularExpressions;
 using DPA_Musicsheets.Managers;
+using DPA_Musicsheets.Builders;
 
 namespace DPA_Musicsheets.Parsers
 {
@@ -37,7 +38,8 @@ namespace DPA_Musicsheets.Parsers
 
         public SJSong ParseToSJSong(string data)
         {
-            SJSong song = new SJSong();
+            SJSongBuilder songBuilder = new SJSongBuilder();
+            songBuilder.Prepare();
 
             string content = data.Trim().ToLower().Replace("\r\n", " ").Replace("\n", " ").Replace("  ", " ");
 
@@ -60,20 +62,20 @@ namespace DPA_Musicsheets.Parsers
                 switch (previousLilypondItemString)
                 {
                     case "\\relative":
-                        song.UnheardStartNote = GetSJUnheardStartNote(lilypondItemString, ref previousOctave, ref previousPitch);
+                        songBuilder.SetUnheardStartNote(GetSJUnheardStartNote(lilypondItemString, ref previousOctave, ref previousPitch));
                         break;
                     case "\\clef":
-                        song.ClefType = GetSJClefType(lilypondItemString);
+                        songBuilder.SetClefType(GetSJClefType(lilypondItemString));
                         break;
                     case "\\time":
-                        song.TimeSignature = this.GetSJTimeSignature(lilypondItemString);
+                        songBuilder.SetTimeSignature(GetSJTimeSignature(lilypondItemString));
                         break;
                     case "\\tempo":
                         // Tempo is not supported, therefore default is used.
-                        song.Tempo = 120;
+                        songBuilder.SetTempo(120);
                         break;
                     case "|":
-                        song.Bars.Add(currentBar);
+                        songBuilder.AddBar(currentBar);
                         currentBar = new SJBar();
                         break;
                     default:
@@ -97,7 +99,7 @@ namespace DPA_Musicsheets.Parsers
                 {
                     if (currentBar.Notes.Count != 0)
                     {
-                        song.Bars.Add(currentBar);
+                        songBuilder.AddBar(currentBar);
                         currentBar = new SJBar();
                     }
                 }
@@ -105,7 +107,7 @@ namespace DPA_Musicsheets.Parsers
                 previousLilypondItemString = lilypondItemString;
             }
 
-            return song;
+            return songBuilder.Build();
         }
 
         private SJTimeSignature GetSJTimeSignature(string lilypondItemString)
@@ -148,7 +150,7 @@ namespace DPA_Musicsheets.Parsers
             return note;
         }
 
-        private SJNote GetSJUnheardStartNote(string lilypondItemString, ref int previousOctave, ref SJPitchEnum previousPitch)
+        private SJUnheardNote GetSJUnheardStartNote(string lilypondItemString, ref int previousOctave, ref SJPitchEnum previousPitch)
         {
             SJPitchEnum pitch = GetSJPitch(lilypondItemString);
             SJNoteBuilder.Prepare("U");
