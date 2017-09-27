@@ -39,14 +39,18 @@ namespace DPA_Musicsheets.Parsers
         public SJSong ParseToSJSong(string data)
         {
             SJSongBuilder songBuilder = new SJSongBuilder();
+            SJBarBuilder barBuilder = new SJBarBuilder();
+
             songBuilder.Prepare();
+            barBuilder.Prepare();
+
+            bool barContainsNotes = false;
 
             string content = data.Trim().ToLower().Replace("\r\n", " ").Replace("\n", " ").Replace("  ", " ");
 
             int previousOctave = 3;
             SJPitchEnum previousPitch = SJPitchEnum.Undefined;
             string previousLilypondItemString = "";
-            SJBar currentBar = new SJBar();
             bool isNote;
             bool isRest;
 
@@ -75,8 +79,8 @@ namespace DPA_Musicsheets.Parsers
                         songBuilder.SetTempo(120);
                         break;
                     case "|":
-                        songBuilder.AddBar(currentBar);
-                        currentBar = new SJBar();
+                        songBuilder.AddBar(barBuilder.Build());
+                        barBuilder.Prepare();
                         break;
                     default:
                         isNote = new Regex(@"[a-g][,'eis]*[0-9]+[.]*").IsMatch(previousLilypondItemString);
@@ -88,19 +92,22 @@ namespace DPA_Musicsheets.Parsers
 
                 if (isNote)
                 {
-                    currentBar.Notes.Add(this.GetSJNote(previousLilypondItemString, ref previousOctave, ref previousPitch));
+                    barBuilder.AddNote(GetSJNote(previousLilypondItemString, ref previousOctave, ref previousPitch));
+                    barContainsNotes = true;
                 }
                 else if (isRest)
                 {
-                    currentBar.Notes.Add(this.GetSJRest(previousLilypondItemString));
+                    barBuilder.AddNote(GetSJRest(previousLilypondItemString));
+                    barContainsNotes = true;
                 }
 
                 if(lilypondItemString == "}")
                 {
-                    if (currentBar.Notes.Count != 0)
+                    if (barContainsNotes)
                     {
-                        songBuilder.AddBar(currentBar);
-                        currentBar = new SJBar();
+                        songBuilder.AddBar(barBuilder.Build());
+                        barBuilder.Prepare();
+                        barContainsNotes = false;
                     }
                 }
 

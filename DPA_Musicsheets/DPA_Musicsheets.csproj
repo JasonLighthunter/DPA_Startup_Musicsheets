@@ -103,6 +103,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Builders\SJBarBuilder.cs" />
     <Compile Include="Builders\SJSongBuilder.cs" />
     <Compile Include="Managers\ISJFileHandler.cs" />
     <Compile Include="Managers\ISJStateHandler.cs" />
