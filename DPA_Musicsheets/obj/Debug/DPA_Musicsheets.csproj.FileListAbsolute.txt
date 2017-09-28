@@ -274,7 +274,6 @@ C:\Users\JobCu\Documents\GitRepositories\DPA_Startup_Musicsheets\DPA_Musicsheets
 C:\Users\JobCu\Documents\GitRepositories\DPA_Startup_Musicsheets\DPA_Musicsheets\obj\Debug\Views\App.g.cs
 C:\Users\JobCu\Documents\GitRepositories\DPA_Startup_Musicsheets\DPA_Musicsheets\obj\Debug\GeneratedInternalTypeHelper.g.cs
 C:\Users\JobCu\Documents\GitRepositories\DPA_Startup_Musicsheets\DPA_Musicsheets\obj\Debug\DPA_Musicsheets_MarkupCompile.cache
-C:\Users\JobCu\Documents\GitRepositories\DPA_Startup_Musicsheets\DPA_Musicsheets\obj\Debug\DPA_Musicsheets_MarkupCompile.lref
 C:\Users\JobCu\Documents\GitRepositories\DPA_Startup_Musicsheets\DPA_Musicsheets\obj\Debug\Views\App.baml
 C:\Users\JobCu\Documents\GitRepositories\DPA_Startup_Musicsheets\DPA_Musicsheets\obj\Debug\Views\MidiPlayerCtrl.baml
 C:\Users\JobCu\Documents\GitRepositories\DPA_Startup_Musicsheets\DPA_Musicsheets\obj\Debug\Views\MainWindow.baml
@@ -296,3 +295,4 @@ C:\Users\JobCu\Documents\GitRepositories\DPA_Startup_Musicsheets\DPA_Musicsheets
 \\tsclient\jobcuppen\GitRepositories\DPA_Startup_Musicsheets\DPA_Musicsheets\obj\Debug\GeneratedInternalTypeHelper.g.cs
 \\tsclient\jobcuppen\GitRepositories\DPA_Startup_Musicsheets\DPA_Musicsheets\obj\Debug\DPA_Musicsheets_MarkupCompile.cache
 \\tsclient\jobcuppen\GitRepositories\DPA_Startup_Musicsheets\DPA_Musicsheets\obj\Debug\DPA_Musicsheets_MarkupCompile.lref
+C:\Users\JobCu\Documents\GitRepositories\DPA_Startup_Musicsheets\DPA_Musicsheets\obj\Debug\DPA_Musicsheets.csprojResolveAssemblyReference.cache

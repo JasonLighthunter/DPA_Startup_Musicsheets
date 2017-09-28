@@ -18,15 +18,13 @@ namespace DPA_Musicsheets.Parsers
 
         public SJMidiParser(SJNoteBuilder noteBuilder)
         {
-            this._noteBuilder = noteBuilder;
+            _noteBuilder = noteBuilder;
         }
 
         private List<string> notesOrderWithCrosses = new List<string>() { "c", "cis", "d", "dis", "e", "f", "fis", "g", "gis", "a", "ais", "b" };
         private int absoluteTicks = 0;
         public Sequence ParseFromSJSong(SJSong song)
         {
-            int bpm = 120;
-
             Sequence midiSequence = new Sequence();
 
             Track metaTrack = new Track();
@@ -60,7 +58,6 @@ namespace DPA_Musicsheets.Parsers
             songBuilder.Prepare();
             barBuilder.Prepare();
 
-            //SJBar bar = new SJBar();
             SJTimeSignature timeSignature = null;
 
             int division = data.Division;
@@ -86,29 +83,16 @@ namespace DPA_Musicsheets.Parsers
                             switch (metaMessage.MetaType)
                             {
                                 case MetaType.TimeSignature:
-                                    Console.WriteLine("=== Creating TimeSignature");
-                                    byte[] timeSignatureBytes = metaMessage.GetBytes();
-                                    uint _beatNote = timeSignatureBytes[0];
-                                    uint _beatsPerBar = (uint)(1 / Math.Pow(timeSignatureBytes[1], -2));
-                                    timeSignatureBuilder.Prepare();
-                                    timeSignatureBuilder.SetNoteValueOfBeat(_beatNote);
-                                    timeSignatureBuilder.SetNumberOfBeatsPerBar(_beatsPerBar);
-                                    timeSignature = timeSignatureBuilder.Build();
-                                    songBuilder.SetTimeSignature(timeSignature);
+									SetTimeSignature(songBuilder, timeSignatureBuilder, metaMessage, ref timeSignature);
                                     break;
                                 case MetaType.Tempo:
-                                    Console.WriteLine("=== Creating Tempo");
-                                    byte[] tempoBytes = metaMessage.GetBytes();
-                                    long tempo = (tempoBytes[0] & 0xff) << 16 | (tempoBytes[1] & 0xff) << 8 | (tempoBytes[2] & 0xff);
-                                    ulong _bpm = (ulong)(60000000 / tempo);
-                                    songBuilder.SetTempo(_bpm);
+									SetTempo(songBuilder, metaMessage);
                                     break;
-                                case MetaType.EndOfTrack: //magic
+                                case MetaType.EndOfTrack:
                                     Console.WriteLine("=== Creating endOf Track");
                                     if (previousNoteAbsoluteTicks > 0)
                                     {
                                         // Finish the last notelength.
-                                        //TODO goed kijken naar het toevoegen van de laatste Bar aan Song
                                         AddNoteToBar(timeSignature, barBuilder, previousNoteAbsoluteTicks, midiEvent.AbsoluteTicks, division, ref percentageOfBarReached);
                                         AddBarIfFull(songBuilder, barBuilder, ref percentageOfBarReached);
                                     }
@@ -152,6 +136,28 @@ namespace DPA_Musicsheets.Parsers
             }
             return songBuilder.Build();
         }
+
+		private void SetTimeSignature(SJSongBuilder songBuilder, SJTimeSignatureBuilder timeSignatureBuilder, MetaMessage metaMessage, ref SJTimeSignature timeSignature)
+		{
+			Console.WriteLine("=== Creating TimeSignature");
+			byte[] timeSignatureBytes = metaMessage.GetBytes();
+			uint _beatNote = timeSignatureBytes[0];
+			uint _beatsPerBar = (uint)(1 / Math.Pow(timeSignatureBytes[1], -2));
+			timeSignatureBuilder.Prepare();
+			timeSignatureBuilder.SetNoteValueOfBeat(_beatNote);
+			timeSignatureBuilder.SetNumberOfBeatsPerBar(_beatsPerBar);
+			timeSignature = timeSignatureBuilder.Build();
+			songBuilder.SetTimeSignature(timeSignature);
+		}
+
+		private void SetTempo(SJSongBuilder songBuilder, MetaMessage metaMessage)
+		{
+			Console.WriteLine("=== Creating Tempo");
+			byte[] tempoBytes = metaMessage.GetBytes();
+			long tempo = (tempoBytes[0] & 0xff) << 16 | (tempoBytes[1] & 0xff) << 8 | (tempoBytes[2] & 0xff);
+			ulong _bpm = (ulong)(60000000 / tempo);
+			songBuilder.SetTempo(_bpm);
+		}
 
         private void SetPitchAndAlteration(int midiKey)
         {
@@ -371,6 +377,7 @@ namespace DPA_Musicsheets.Parsers
             }
             return 32;
         }
+
         private int GetDuration(int noteLength)
         {
             for (int i = 4; i > 0; i--)
