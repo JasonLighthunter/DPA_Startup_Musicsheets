@@ -32,7 +32,7 @@ namespace DPA_Musicsheets.ViewModels
 					Staffs.Add(symbol);
 				}
 
-				MessengerInstance.Send<CurrentStateMessage>(new CurrentStateMessage() { State = args.Message });
+				MessengerInstance.Send(new CurrentStateMessage() { State = args.Message });
 			};
 		}
 	}

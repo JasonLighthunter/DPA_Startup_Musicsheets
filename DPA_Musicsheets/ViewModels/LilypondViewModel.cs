@@ -59,7 +59,7 @@ namespace DPA_Musicsheets.ViewModels
             {
                 _waitingForRender = true;
                 _lastChange = DateTime.Now;
-                MessengerInstance.Send<CurrentStateMessage>(new CurrentStateMessage() { State = "Rendering..." });
+                MessengerInstance.Send(new CurrentStateMessage() { State = "Rendering..." });
 
                 Task.Delay(MILLISECONDS_BEFORE_CHANGE_HANDLED).ContinueWith((task) =>
                 {

@@ -61,7 +61,7 @@ namespace DPA_Musicsheets.ViewModels
 
         public ICommand OpenFileCommand => new RelayCommand(() =>
         {
-            OpenFileDialog openFileDialog = new OpenFileDialog() { Filter = "Midi or LilyPond files (*.mid *.ly)|*.mid;*.ly" };
+            OpenFileDialog openFileDialog = new OpenFileDialog() { Filter = "Midi, LilyPond or MusicXML files (*.mid *.ly *.xml)|*.mid;*.ly;*.xml" };
             if (openFileDialog.ShowDialog() == true)
             {
                 FileName = openFileDialog.FileName;

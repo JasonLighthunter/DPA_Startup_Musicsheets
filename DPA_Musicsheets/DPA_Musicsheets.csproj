@@ -117,6 +117,7 @@
     <Compile Include="Managers\SJMidiStateHandler.cs" />
     <Compile Include="Builders\SJNoteBuilder.cs" />
     <Compile Include="Builders\SJNoteFactory.cs" />
+    <Compile Include="Managers\SJMusicXMLFileHandler.cs" />
     <Compile Include="Managers\SJWPFStaffStateHandler.cs" />
     <Compile Include="Managers\WPFStaffsEventArgs.cs" />
     <Compile Include="Managers\LilypondEventArgs.cs" />

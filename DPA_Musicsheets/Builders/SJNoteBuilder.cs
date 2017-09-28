@@ -67,6 +67,7 @@ namespace DPA_Musicsheets.Builders
                 {
                     throw new ArgumentException();
                 }
+				Console.WriteLine("NoteMade");
                 return note;
             }
             throw new ArgumentException();

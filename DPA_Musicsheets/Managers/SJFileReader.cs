@@ -16,6 +16,7 @@ namespace DPA_Musicsheets.Managers
         //private SJFileHandlerFactory _fileHandlerFactory { get; set; }
         private ISJFileHandler _midiFileHandler { get; set; }
         private ISJFileHandler _lilypondFileHandler { get; set; }
+		private ISJFileHandler _musicXMLFileHandler { get; set; }
 
         private SJLilypondParser _lilypondParser;
         private SJMidiParser _midiParser;
@@ -25,14 +26,15 @@ namespace DPA_Musicsheets.Managers
         private SJMidiStateHandler midiStateHandler;
         private SJWPFStaffStateHandler staffsStateHandler;
 
-        public SJFileReader(SJMidiFileHandler midiFileHandler, SJLilypondFileHandler lilypondFileHandler, SJLilypondParser lilypondParser, SJMidiParser midiParser, SJWPFStaffsParser staffsParser)
+        public SJFileReader(SJMidiFileHandler midiFileHandler, SJLilypondFileHandler lilypondFileHandler, SJMusicXMLFileHandler musicXMLFileHandler, SJLilypondParser lilypondParser, SJMidiParser midiParser, SJWPFStaffsParser staffsParser)
         {
-            //         _fileHandlerFactory = fileHandlerFactory;
+            //_fileHandlerFactory = fileHandlerFactory;
             //_fileHandlerFactory.AddFileHandlerType(".mid", typeof(SJMidiFileHandler));
-            //         _fileHandlerFactory.AddFileHandlerType(".ly", typeof(SJLilypondFileHandler));
+            //_fileHandlerFactory.AddFileHandlerType(".ly", typeof(SJLilypondFileHandler));
 
             _midiFileHandler = midiFileHandler;
-            _lilypondFileHandler = lilypondFileHandler;
+			_lilypondFileHandler = lilypondFileHandler;
+			_musicXMLFileHandler = musicXMLFileHandler;
 
             _lilypondParser = lilypondParser;
             _midiParser = midiParser;
@@ -58,11 +60,13 @@ namespace DPA_Musicsheets.Managers
                     case ".ly":
                         song = _lilypondFileHandler.LoadSong(fileName);
                         break;
+					case ".xml":
+						song = _musicXMLFileHandler.LoadSong(fileName);
+						break;
                     default:
                         break;
                 }
                  
-
                 Sequence midiSequence = _midiParser.ParseFromSJSong(song);
                 string lilypondContent = _lilypondParser.ParseFromSJSong(song);
                 IEnumerable<MusicalSymbol> symbols = _staffsParser.ParseFromSJSong(song);
