@@ -135,17 +135,21 @@ namespace DPA_Musicsheets.Parsers
         {
             int speed = (int)(60000000 / songTempo);
             byte[] tempo = new byte[3];
+
             tempo[0] = (byte)((speed >> 16) & 0xff);
             tempo[1] = (byte)((speed >> 8) & 0xff);
             tempo[2] = (byte)(speed & 0xff);
+            
             return tempo;
         }
 
         private byte[] GetMidiTimeSignature(SJTimeSignature songTimeSignature)
         {
             byte[] timeSignature = new byte[4];
+
             timeSignature[0] = (byte)songTimeSignature.NumberOfBeatsPerBar;
             timeSignature[1] = (byte)(Math.Log(songTimeSignature.NoteValueOfBeat) / Math.Log(2));
+
             return timeSignature;
         }
 
