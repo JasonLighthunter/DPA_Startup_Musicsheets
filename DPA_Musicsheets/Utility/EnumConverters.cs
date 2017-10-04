@@ -108,6 +108,34 @@ namespace DPA_Musicsheets.Utility
             }
         }
 
+        public static SJPitchEnum ConvertMidiKeyToSJNotePitchEnum(int midiKey)
+        {
+            switch (midiKey % 12)
+            {
+                case 0:
+                case 1:
+                    return SJPitchEnum.C;
+                case 2:
+                case 3:
+                    return SJPitchEnum.D;
+                case 4:
+                    return SJPitchEnum.E;
+                case 5:
+                case 6:
+                    return SJPitchEnum.F;
+                case 7:
+                case 8:
+                    return SJPitchEnum.G;
+                case 9:
+                case 10:
+                    return SJPitchEnum.A;
+                case 11:
+                    return SJPitchEnum.B;
+                default:
+                    return SJPitchEnum.Undefined;
+            }
+        }
+
         public static SJClefTypeEnum ConvertStringToClefTypeEnum(string clefTypeString)
         {
             switch (clefTypeString.ToLower())
