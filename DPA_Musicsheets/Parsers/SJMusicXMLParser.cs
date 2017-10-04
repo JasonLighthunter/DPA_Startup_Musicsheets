@@ -177,7 +177,8 @@ namespace DPA_Musicsheets.Parsers
 				{
 					case "<sound":
 						string tempoString = line.Trim().Split(' ')[1].Split('=')[1].Replace("\"", "");
-						return (ulong)double.Parse(tempoString);
+                        tempoString = tempoString.Replace('.', ',');
+                        return (ulong)double.Parse(tempoString);
 					default:
 						break;
 				}

@@ -11,15 +11,35 @@ namespace DPA_Musicsheets.Parsers
 {
     public class SJWPFStaffsParser : ISJParser<IEnumerable<MusicalSymbol>>
     {
+        private Dictionary<SJClefTypeEnum, Clef> _clefDictionary { get; set; }
+        private List<MusicalSymbol> _symbols { get; set; }
+
+        public SJWPFStaffsParser()
+        {
+            _clefDictionary = new Dictionary<SJClefTypeEnum, Clef>()
+            {
+                {SJClefTypeEnum.Alto, null },
+                {SJClefTypeEnum.Bass, new Clef(ClefType.FClef, 4) },
+                {SJClefTypeEnum.Tenor, null },
+                {SJClefTypeEnum.Treble, new Clef(ClefType.GClef, 2) },
+                {SJClefTypeEnum.Undefined, null }
+            };
+        }
+
         public IEnumerable<MusicalSymbol> ParseFromSJSong(SJSong song)
         {
-            List<MusicalSymbol> symbols = new List<MusicalSymbol>();
+            _symbols = new List<MusicalSymbol>();
 
-            symbols.Add(GetClefSymbol(song.ClefType));
-            symbols.Add(new TimeSignature(TimeSignatureType.Numbers, song.TimeSignature.NumberOfBeatsPerBar, song.TimeSignature.NoteValueOfBeat));
-            AddBars(song.Bars, ref symbols);
+            _symbols.Add(_clefDictionary[song.ClefType]);
+            _symbols.Add( new TimeSignature(
+                    TimeSignatureType.Numbers,
+                    song.TimeSignature.NumberOfBeatsPerBar,
+                    song.TimeSignature.NoteValueOfBeat
+                ));
 
-            return symbols;
+            AddBars(song.Bars);
+
+            return _symbols;
         }
 
 
@@ -28,42 +48,21 @@ namespace DPA_Musicsheets.Parsers
             throw new NotImplementedException();
         }
 
-        private MusicalSymbol GetClefSymbol(SJClefTypeEnum clefValue)
-        {
-            switch (clefValue)
-            {
-                case SJClefTypeEnum.Treble:
-                    return new Clef(ClefType.GClef, 2);
-                case SJClefTypeEnum.Bass:
-                    return new Clef(ClefType.FClef, 4);
-                case SJClefTypeEnum.Alto:
-                case SJClefTypeEnum.Tenor:
-                default:
-                    throw new NotSupportedException($"Clef {clefValue.ToString()} is not supported.");
-            }
-        }
-
-        private void AddBars(List<SJBar> bars, ref List<MusicalSymbol> symbols)
+        private void AddBars(List<SJBar> bars)
         {
             foreach (var bar in bars)
             {
-                AddNotes(bar.Notes, ref symbols);
-                symbols.Add(new Barline());
+                AddNotes(bar.Notes);
+                _symbols.Add(new Barline());
             }
         }
 
-        private void AddNotes(List<SJBaseNote> notes, ref List<MusicalSymbol> symbols)
+        private void AddNotes(List<SJBaseNote> notes)
         {   
             foreach(var note in notes)
             {
-                if (note is SJRest)
-                {
-                    symbols.Add(GetRestSymbol((SJRest)note));
-                }
-                else
-                {
-                    symbols.Add(GetNoteSymbol((SJNote)note));
-                }
+                var newSymbol = (note is SJRest) ? GetRestSymbol((SJRest)note) : GetNoteSymbol((SJNote)note);
+                _symbols.Add(newSymbol);
             }
         }
 
@@ -71,21 +70,21 @@ namespace DPA_Musicsheets.Parsers
         {
             var restLength = getBaseNoteLength(note.Duration);
             return new Rest((MusicalSymbolDuration)restLength);
-            
         }
 
         private MusicalSymbol GetNoteSymbol(SJNote note)
         {
-            // Length
             int noteLength = getBaseNoteLength(note.Duration);
-            // Crosses and Moles
-            int alter = note.PitchAlteration;
 
             var noteSymbol = new Note(
-                note.Pitch.ToString(), alter, note.Octave,
-                (MusicalSymbolDuration)noteLength, NoteStemDirection.Up, NoteTieType.None,
+                note.Pitch.ToString(),
+                note.PitchAlteration,
+                note.Octave,
+                (MusicalSymbolDuration)noteLength,
+                NoteStemDirection.Up,
+                NoteTieType.None,
                 new List<NoteBeamType>() { NoteBeamType.Single }
-                );
+            );
             noteSymbol.NumberOfDots = (int)note.NumberOfDots;
 
             return noteSymbol;
