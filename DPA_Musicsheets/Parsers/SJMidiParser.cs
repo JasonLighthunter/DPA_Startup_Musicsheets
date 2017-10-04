@@ -20,9 +20,10 @@ namespace DPA_Musicsheets.Parsers
         private int _previousNoteAbsoluteTicks { get; set; }
         private SJBarBuilder _barBuilder { get; set; }
         private SJSongBuilder _songBuilder { get; set; }
+        private bool _startedNoteIsClosed { get; set; }
 
-
-        private Dictionary<MetaType, Action<MidiEvent>> _midiToSJSongParserDictionary { get; set; }
+        private Dictionary<MetaType, Action<MidiEvent>> _midiToSJSongMetaParserDictionary { get; set; }
+        private Dictionary<MessageType, Action<MidiEvent>> _midiToSJSongMessageParserDicionary { get; set; }
 
         private SJNoteBuilder _noteBuilder { get; set; }
 
@@ -30,7 +31,7 @@ namespace DPA_Musicsheets.Parsers
         {
             _noteBuilder = noteBuilder;
 
-            _midiToSJSongParserDictionary = new Dictionary<MetaType, Action<MidiEvent>>()
+            _midiToSJSongMetaParserDictionary = new Dictionary<MetaType, Action<MidiEvent>>()
             {
                 { MetaType.Copyright, null },
                 { MetaType.CuePoint, null },
@@ -48,6 +49,15 @@ namespace DPA_Musicsheets.Parsers
                 { MetaType.Text, null },
                 { MetaType.TimeSignature, SetTimeSignature },
                 { MetaType.TrackName, null }
+            };
+            _midiToSJSongMessageParserDicionary = new Dictionary<MessageType, Action<MidiEvent>>()
+            {
+                { MessageType.Channel, ParseFromChannelData },
+                { MessageType.Meta, ParseFromMetaData },
+                { MessageType.Short, null },
+                { MessageType.SystemCommon, null },
+                { MessageType.SystemExclusive, null },
+                { MessageType.SystemRealtime, null }
             };
         }
 
@@ -98,65 +108,53 @@ namespace DPA_Musicsheets.Parsers
             _songBuilder.SetClefType(SJClefTypeEnum.Treble);
             _previousNoteAbsoluteTicks = 0;
             _percentageOfBarReached = 0;
-            bool startedNoteIsClosed = true;
-
-            //List<MidiEvent> metaList = new List<MidiEvent>();
-            //List < MidiEvent > channelList = new List<MidiEvent>();
+            _startedNoteIsClosed = true;
 
             for (int i = 0; i < data.Count(); i++) //voor elke track in de sequence
             {
                 Track track = data[i];//selecteer een track
-
-                //metaList.AddRange(track.Iterator().Where(e => e.MidiMessage.MessageType == MessageType.Meta).ToList());
-                //channelList.AddRange(track.Iterator().Where(e => e.MidiMessage.MessageType == MessageType.Channel).ToList());
-
+                
                 foreach (var midiEvent in track.Iterator())//loop door elk event per track
                 {
                     IMidiMessage midiMessage = midiEvent.MidiMessage;
 
-                    //_midiToSJSongParserDictionary[midiMessage.MessageType].Invoke(midiEvent);
-                    switch (midiMessage.MessageType)
-                    {
-                        case MessageType.Meta:
-
-                            var metaMessage = midiMessage as MetaMessage;
-                            _midiToSJSongParserDictionary[metaMessage.MetaType]?.Invoke(midiEvent);
-
-                            break;
-                        case MessageType.Channel:
-                            Console.WriteLine("=== CreatingNote");
-                            var channelMessage = midiEvent.MidiMessage as ChannelMessage;
-                            if (channelMessage.Command == ChannelCommand.NoteOn)
-                            {
-                                if (channelMessage.Data2 > 0) // Data2 = loudness
-                                {
-                                    Console.WriteLine("===@ Creating Octave and Pitch");
-                                    _noteBuilder.Prepare("N");
-                                    SetPitchAndAlteration(channelMessage.Data1);
-                                    SetOctave(previousMidiKey, channelMessage.Data1);
-
-                                    previousMidiKey = channelMessage.Data1;
-                                    startedNoteIsClosed = false;
-                                }
-                                else if (!startedNoteIsClosed)
-                                {
-                                    AddNoteToBar(midiEvent.AbsoluteTicks);
-                                    AddBarIfFull();
-
-                                    _previousNoteAbsoluteTicks = midiEvent.AbsoluteTicks;
-                                    startedNoteIsClosed = true;
-                                }
-                                else
-                                {
-                                    Console.WriteLine("===@ Preparing Rest");
-                                    _noteBuilder.Prepare("R");
-                                }
-                            }
-                            break;
-                    }
+                    _midiToSJSongMessageParserDicionary[midiMessage.MessageType]?.Invoke(midiEvent);
                 }
             }
             return _songBuilder.Build();
+        }
+
+        private void ParseFromChannelData(MidiEvent midiEvent)
+        {
+            var channelMessage = midiEvent.MidiMessage as ChannelMessage;
+            if (channelMessage.Command == ChannelCommand.NoteOn)
+            {
+                if (channelMessage.Data2 > 0) // Data2 = loudness
+                {
+                    _noteBuilder.Prepare("N");
+                    SetPitchAndAlteration(channelMessage.Data1);
+                    SetOctave(channelMessage.Data1);
+                    _startedNoteIsClosed = false;
+                }
+                else if (!_startedNoteIsClosed)
+                {
+                    AddNoteToBar(midiEvent.AbsoluteTicks);
+                    AddBarIfFull();
+
+                    _previousNoteAbsoluteTicks = midiEvent.AbsoluteTicks;
+                    _startedNoteIsClosed = true;
+                }
+                else
+                {
+                    _noteBuilder.Prepare("R");
+                }
+            }
+        }
+
+        private void ParseFromMetaData(MidiEvent midiEvent)
+        {
+            var metaMessage = midiEvent.MidiMessage as MetaMessage;
+            _midiToSJSongMetaParserDictionary[metaMessage.MetaType]?.Invoke(midiEvent);
         }
 
         private void SetEndOfTrack(MidiEvent midiEvent)
@@ -302,7 +300,7 @@ namespace DPA_Musicsheets.Parsers
             }
         }
 
-        private void SetOctave(int previousMidiKey, int midiKey)
+        private void SetOctave(int midiKey)
         {
             int octave = (midiKey / 12) - 1;
 
@@ -370,11 +368,11 @@ namespace DPA_Musicsheets.Parsers
             _noteBuilder.SetDuration(EnumConverters.ConvertDoubleToSJNoteDurationEnum(1.0 / duration));
         }
 
-        private SJUnheardNote SetUnheardStartNote(int midiPitchValue)
+        private SJUnheardNote SetUnheardStartNote(int previousMidiKey)
         {
             _noteBuilder.Prepare("U");
-            SetOctave(midiPitchValue, midiPitchValue);
-            SetPitchAndAlteration(midiPitchValue);
+            SetOctave(previousMidiKey);
+            SetPitchAndAlteration(previousMidiKey);
             return (SJUnheardNote)_noteBuilder.Build();
         }
 
