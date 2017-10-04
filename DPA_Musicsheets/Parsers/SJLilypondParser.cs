@@ -17,7 +17,7 @@ namespace DPA_Musicsheets.Parsers
 
         public SJLilypondParser(SJNoteBuilder noteBuilder)
         {
-            this._noteBuilder = noteBuilder;
+            _noteBuilder = noteBuilder;
         }
 
         private static List<SJPitchEnum> notesorder = new List<SJPitchEnum> {

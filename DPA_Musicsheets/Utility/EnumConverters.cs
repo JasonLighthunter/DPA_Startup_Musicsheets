@@ -34,7 +34,32 @@ namespace DPA_Musicsheets.Utility
 			}
 		}
 
-        public static double ConvertSJNoteDurationEnumToDouble(SJNoteDurationEnum enumValue)
+		public static SJNoteDurationEnum ConvertMusicXMLStringToSJNoteDurationEnum(string stringValue)
+		{
+			switch(stringValue)
+			{
+				case "long":
+					return SJNoteDurationEnum.Long;
+				case "double":
+					return SJNoteDurationEnum.Double;
+				case "whole":
+					return SJNoteDurationEnum.Whole;
+				case "half":
+					return SJNoteDurationEnum.Half;
+				case "quarter":
+					return SJNoteDurationEnum.Quarter;
+				case "eighth":
+					return SJNoteDurationEnum.Eighth;
+				case "16th":
+					return SJNoteDurationEnum.Sixteenth;
+				case "32th":
+					return SJNoteDurationEnum.ThirtySecond;
+				default:
+					return SJNoteDurationEnum.Undefined;
+			}
+		}
+
+		public static double ConvertSJNoteDurationEnumToDouble(SJNoteDurationEnum enumValue)
         {
             switch (enumValue)
             {
@@ -99,5 +124,16 @@ namespace DPA_Musicsheets.Utility
                     return SJClefTypeEnum.Undefined;
             }
         }
+
+		public static SJClefTypeEnum ConvertCharacterToClefTypeEnum(char clefTypeCharacter)
+		{
+			switch(clefTypeCharacter.ToString().ToLower())
+			{
+				case "g":
+					return SJClefTypeEnum.Treble;
+				default:
+					return SJClefTypeEnum.Undefined;
+			}
+		}
     }
 }
