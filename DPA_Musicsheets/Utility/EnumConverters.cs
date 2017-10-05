@@ -13,9 +13,9 @@ namespace DPA_Musicsheets.Utility
 		{
 			switch(doubleValue)
 			{
-                case 4.0:
-                    return SJNoteDurationEnum.Long;
-                case 2.0:
+				case 4.0:
+					return SJNoteDurationEnum.Long;
+				case 2.0:
 				    return SJNoteDurationEnum.Double;
 			    case 1.0:
 				    return SJNoteDurationEnum.Whole;
@@ -60,19 +60,19 @@ namespace DPA_Musicsheets.Utility
 		}
 
 		public static double ConvertSJNoteDurationEnumToDouble(SJNoteDurationEnum enumValue)
-        {
-            switch (enumValue)
-            {
-                case SJNoteDurationEnum.Long:
-                    return 4.0;
-                case SJNoteDurationEnum.Double:
-                    return 2.0;
-                case SJNoteDurationEnum.Whole:
-                    return 1.0;
-                case SJNoteDurationEnum.Half:
-                    return 0.5;
-                case SJNoteDurationEnum.Quarter:
-                    return 0.25;
+		{
+			switch (enumValue)
+			{
+				case SJNoteDurationEnum.Long:
+					return 4.0;
+				case SJNoteDurationEnum.Double:
+					return 2.0;
+				case SJNoteDurationEnum.Whole:
+					return 1.0;
+				case SJNoteDurationEnum.Half:
+					return 0.5;
+				case SJNoteDurationEnum.Quarter:
+					return 0.25;
                 case SJNoteDurationEnum.Eighth:
                     return 0.125;
                 case SJNoteDurationEnum.Sixteenth:
@@ -128,7 +128,7 @@ namespace DPA_Musicsheets.Utility
                     return SJPitchEnum.G;
                 case 9:
                 case 10:
-                    return SJPitchEnum.A;
+					return SJPitchEnum.A;
                 case 11:
                     return SJPitchEnum.B;
                 default:
@@ -149,7 +149,7 @@ namespace DPA_Musicsheets.Utility
                 case "alto":
                     return SJClefTypeEnum.Alto;
                 default:
-                    return SJClefTypeEnum.Undefined;
+					return SJClefTypeEnum.Undefined;
             }
         }
 
@@ -161,6 +161,23 @@ namespace DPA_Musicsheets.Utility
 					return SJClefTypeEnum.Treble;
 				default:
 					return SJClefTypeEnum.Undefined;
+			}
+		}
+
+		public static SJLilypondParserKeyEnum ConvertLilypondStringToKeyEnum(string lilypondString)
+		{
+			switch(lilypondString)
+			{
+				case "\\relative":
+					return SJLilypondParserKeyEnum.RelativeKey;
+				case "\\clef":
+					return SJLilypondParserKeyEnum.ClefKey;
+				case "\\time":
+					return SJLilypondParserKeyEnum.TimeSignatureKey;
+				case "\\tempo":
+					return SJLilypondParserKeyEnum.TempoKey;
+				default:
+					return SJLilypondParserKeyEnum.Undefined;
 			}
 		}
     }
