@@ -1,15 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using DPA_Musicsheets.Models;
 using DPA_Musicsheets.Builders;
 using DPA_Musicsheets.Utility;
 
 namespace DPA_Musicsheets.Parsers
 {
-    public class SJMusicXMLParser : ISJParser<String>
+	public class SJMusicXMLParser : ISJParser<String>
     {
 		private SJNoteBuilder _noteBuilder { get; set; }
 
@@ -32,17 +29,9 @@ namespace DPA_Musicsheets.Parsers
 			songBuilder.Prepare();
 
 			songBuilder.SetUnheardStartNote(GetCentralCUnheardNote());
-			
-			//bool barContainsNotes = false;
 
 			string delimiter = ">";
 			string[] content = data.Trim().ToLower().Replace("\r\n", "").Replace("\n", "").Replace("  ", " ").Split(delimiter.ToCharArray());
-
-			//int previousOctave = 3;
-			//SJPitchEnum previousPitch = SJPitchEnum.Undefined;
-			//string previousLilypondItemString = "";
-			//bool isNote;
-			//bool isRest;
 
 			int indexOfMeasureStart = 0;
 			int indexOfMeasureEnd = 0;
@@ -52,8 +41,7 @@ namespace DPA_Musicsheets.Parsers
 				string line = content[i];
 
 				switch(line.Trim().Split(' ').First())
-				{
-					
+				{					
 					case "<measure":
 						barBuilder.Prepare();
 						indexOfMeasureStart = i;
@@ -129,13 +117,10 @@ namespace DPA_Musicsheets.Parsers
 			{
 				string previousLine = attributesArray[i-1];
 
-				switch(previousLine.Trim().Split(' ').First())
+				if(previousLine.Trim().Split(' ').First() == "<sign")
 				{
-					case "<sign":
-						char clefTypeCharacter = attributesArray[i].Trim().First();
-						return EnumConverters.ConvertCharacterToClefTypeEnum(clefTypeCharacter);
-					default:
-						break;
+					char clefTypeCharacter = attributesArray[i].Trim().First();
+					return EnumConverters.ConvertCharacterToClefTypeEnum(clefTypeCharacter);
 				}
 			}
 			return SJClefTypeEnum.Undefined;
@@ -173,14 +158,11 @@ namespace DPA_Musicsheets.Parsers
 			{
 				string line = directionArray[i];
 
-				switch(line.Trim().Split(' ').First())
+				if(line.Trim().Split(' ').First() == "<sound")
 				{
-					case "<sound":
-						string tempoString = line.Trim().Split(' ')[1].Split('=')[1].Replace("\"", "");
-                        tempoString = tempoString.Replace('.', ',');
-                        return (ulong)double.Parse(tempoString);
-					default:
-						break;
+					string tempoString = line.Trim().Split(' ')[1].Split('=')[1].Replace("\"", "");
+					tempoString = tempoString.Replace('.', ',');
+					return (ulong)double.Parse(tempoString);
 				}
 			}
 			return 0;
@@ -192,16 +174,12 @@ namespace DPA_Musicsheets.Parsers
 			string string2 = "<rest/";
 
 			Console.WriteLine(string1 + " == " + string2);
-			if(noteArray[1].Trim() == "<rest /")
-			{
-				return GetRestFromNoteArray(noteArray);
-			} else
-			{
-				return GetNoteFromNoteArray(noteArray);
-			}
+
+			SJBaseNote returnValue = (noteArray[1].Trim() == "<rest /") ? GetRestFromNoteArray(noteArray) : GetNoteFromNoteArray(noteArray));
+			return returnValue;
 		}
 
-		private SJRest GetRestFromNoteArray(string[] noteArray)
+		private SJBaseNote GetRestFromNoteArray(string[] noteArray)
 		{
 			uint numberOfDots = 0;
 
@@ -229,7 +207,7 @@ namespace DPA_Musicsheets.Parsers
 			return (SJRest)_noteBuilder.Build();
 		}
 
-		private SJNote GetNoteFromNoteArray(string[] noteArray)
+		private SJBaseNote GetNoteFromNoteArray(string[] noteArray)
 		{
 			int indexOfPitchStart = 0;
 			int indexOfPitchEnd = 0;
@@ -299,13 +277,10 @@ namespace DPA_Musicsheets.Parsers
 			{
 				string previousLine = pitchArray[i - 1];
 
-				switch(previousLine.Trim().Split(' ').First())
+				if(previousLine.Trim().Split(' ').First() == "<octave")
 				{
-					case "<octave":
-						int octave = int.Parse(pitchArray[i].Trim().First().ToString());
-						return octave;
-					default:
-						break;
+					int octave = int.Parse(pitchArray[i].Trim().First().ToString());
+					return octave;
 				}
 			}
 			return 0;
@@ -317,13 +292,10 @@ namespace DPA_Musicsheets.Parsers
 			{
 				string previousLine = pitchArray[i - 1];
 
-				switch(previousLine.Trim().Split(' ').First())
+				if(previousLine.Trim().Split(' ').First() == "<step")
 				{
-					case "<step":
-						char pitchCharacter = pitchArray[i].Trim().First();
-						return EnumConverters.ConvertCharToSJNotePitchEnum(pitchCharacter);
-					default:
-						break;
+					char pitchCharacter = pitchArray[i].Trim().First();
+					return EnumConverters.ConvertCharToSJNotePitchEnum(pitchCharacter);
 				}
 			}
 			return SJPitchEnum.Undefined;
