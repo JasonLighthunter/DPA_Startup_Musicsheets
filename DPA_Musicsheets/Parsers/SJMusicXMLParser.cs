@@ -1,332 +1,220 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using DPA_Musicsheets.Models;
 using DPA_Musicsheets.Builders;
 using DPA_Musicsheets.Utility;
+using System.Collections.Generic;
 
 namespace DPA_Musicsheets.Parsers
 {
     public class SJMusicXMLParser : ISJParser<String>
     {
-		private SJNoteBuilder _noteBuilder { get; set; }
+        private SJNoteBuilder _noteBuilder { get; set; }
 
-		public SJMusicXMLParser(SJNoteBuilder noteBuilder)
-		{
-			_noteBuilder = noteBuilder;
-		}
+        public SJMusicXMLParser(SJNoteBuilder noteBuilder)
+        {
+            _noteBuilder = noteBuilder;
+        }
 
-		public string ParseFromSJSong(SJSong song)
+        public string ParseFromSJSong(SJSong song)
         {
             throw new NotImplementedException();
         }
 
         public SJSong ParseToSJSong(string data)
         {
-			SJSongBuilder songBuilder = new SJSongBuilder();
-			SJBarBuilder barBuilder = new SJBarBuilder();
-			SJTimeSignatureBuilder timeSignatureBuilder = new SJTimeSignatureBuilder();
+            SJSongBuilder songBuilder = new SJSongBuilder();
+            SJBarBuilder barBuilder = new SJBarBuilder();
+            SJTimeSignatureBuilder timeSignatureBuilder = new SJTimeSignatureBuilder();
 
-			songBuilder.Prepare();
+            songBuilder.Prepare();
 
-			songBuilder.SetUnheardStartNote(GetCentralCUnheardNote());
-			
-			//bool barContainsNotes = false;
+            songBuilder.SetUnheardStartNote(GetCentralCUnheardNote());
 
-			string delimiter = ">";
-			string[] content = data.Trim().ToLower().Replace("\r\n", "").Replace("\n", "").Replace("  ", " ").Split(delimiter.ToCharArray());
+            string xmlOneLine = data.Trim().ToLower().Replace("\r\n", "").Replace("\n", "").Replace("  ", "");
+            string[] separators = { ">", "<" };
+            string[] content = xmlOneLine.Split(separators, StringSplitOptions.RemoveEmptyEntries);
 
-			//int previousOctave = 3;
-			//SJPitchEnum previousPitch = SJPitchEnum.Undefined;
-			//string previousLilypondItemString = "";
-			//bool isNote;
-			//bool isRest;
+            string[][] measures = GetElementAsStringArrayArray(content, "measure");
+            foreach (string[] measure in measures)
+            {
+                songBuilder.AddBar(GetBarFromBarArray(measure, barBuilder, songBuilder, timeSignatureBuilder));
+            }
 
-			int indexOfMeasureStart = 0;
-			int indexOfMeasureEnd = 0;
+            return songBuilder.Build();
+        }
 
-			for(int i = 0; i < content.Length; i++)
-			{
-				string line = content[i];
+        private SJBar GetBarFromBarArray(string[] barArray, SJBarBuilder barBuilder, SJSongBuilder songBuilder, SJTimeSignatureBuilder timeSignatureBuilder)
+        {
+            barBuilder.Prepare();
 
-				switch(line.Trim().Split(' ').First())
-				{
-					
-					case "<measure":
-						barBuilder.Prepare();
-						indexOfMeasureStart = i;
-						break;
-					case "</measure":
-						indexOfMeasureEnd = i;
-						var barArray = content.Skip(indexOfMeasureStart).Take(indexOfMeasureEnd - indexOfMeasureStart + 1).ToArray();
-						songBuilder.AddBar(GetBarFromBarArray(barArray, barBuilder, songBuilder, timeSignatureBuilder));
-						break;
-					default:
-						break;
-				}
-			}
-			
-			return songBuilder.Build();
-		}
+            string[][] attributes = GetElementAsStringArrayArray(barArray, "attributes");
+            foreach (string[] attribute in attributes)
+            {
+                songBuilder.SetClefType(GetClefTypeFromAttributesArray(attribute));
+                songBuilder.SetTimeSignature(GetTimeSignatureFromAttributesArray(attribute, timeSignatureBuilder));
+            }
 
-		private SJBar GetBarFromBarArray(string[] barArray, SJBarBuilder barBuilder, SJSongBuilder songBuilder, SJTimeSignatureBuilder timeSignatureBuilder)
-		{
-			int indexOfAttributesStart = 0;
-			int indexOfAttributesEnd = 0;
+            string[][] directions = GetElementAsStringArrayArray(barArray, "direction");
+            foreach (string[] direction in directions)
+            {
+                songBuilder.SetTempo(GetTempoFromDirectionArray(direction));
+            }
 
-			int indexOfDirectionStart = 0;
-			int indexOfDirectionEnd = 0;
+            string[][] notes = GetElementAsStringArrayArray(barArray, "note");
+            foreach (string[] note in notes)
+            {
+                barBuilder.AddNote(GetBaseNoteFromNoteArray(note));
+            }
 
-			int indexOfNoteStart = 0;
-			int indexOfNoteEnd = 0;
+            return barBuilder.Build();
+        }
 
-			barBuilder.Prepare();
+        private SJClefTypeEnum GetClefTypeFromAttributesArray(string[] attributesArray)
+        {
+            string[][] signs = GetElementAsStringArrayArray(attributesArray, "sign");
+            return EnumConverters.ConvertCharacterToClefTypeEnum(signs[0][0][0]);
+        }
 
-			for(int i = 0; i < barArray.Length; i++)
-			{
-				string line = barArray[i];
+        private SJTimeSignature GetTimeSignatureFromAttributesArray(string[] attributesArray, SJTimeSignatureBuilder timeSignatureBuilder)
+        {
+            timeSignatureBuilder.Prepare();
 
-				switch(line.Trim().Split(' ').First())
-				{
-					case "<attributes":
-						indexOfAttributesStart = i;
-						break;
-					case "</attributes":
-						indexOfAttributesEnd = i;
-						string[] attributesArray = barArray.Skip(indexOfAttributesStart).Take(indexOfAttributesEnd - indexOfAttributesStart + 1).ToArray();
-						songBuilder.SetClefType(GetClefTypeFromAttributesArray(attributesArray));
-						songBuilder.SetTimeSignature(GetTimeSignatureFromAttributesArray(attributesArray, timeSignatureBuilder));
-						break;
-					case "<direction":
-						indexOfDirectionStart = i;
-						break;
-					case "</direction":
-						indexOfDirectionEnd = i;
-						string[] directionArray = barArray.Skip(indexOfDirectionStart).Take(indexOfDirectionEnd - indexOfDirectionStart + 1).ToArray();
-						songBuilder.SetTempo(GetTempoFromDirectionArray(directionArray));
-						break;
-					case "<note":
-						indexOfNoteStart = i;
-						break;
-					case "</note":
-						indexOfNoteEnd = i;
-						string[] noteArray = barArray.Skip(indexOfNoteStart).Take(indexOfNoteEnd - indexOfNoteStart + 1).ToArray();
-						barBuilder.AddNote(GetBaseNoteFromNoteArray(noteArray));
-						break;
-					default:
-						break;
-				}
+            string[][] beatsPerbar = GetElementAsStringArrayArray(attributesArray, "beats");
+            timeSignatureBuilder.SetNumberOfBeatsPerBar(uint.Parse(beatsPerbar[0][0]));
 
-			}
-			return barBuilder.Build();
-		}
+            string[][] noteValueOfBeat = GetElementAsStringArrayArray(attributesArray, "beat-type");
+            timeSignatureBuilder.SetNoteValueOfBeat(uint.Parse(noteValueOfBeat[0][0]));
 
-		private SJClefTypeEnum GetClefTypeFromAttributesArray(string[] attributesArray)
-		{
-			for(int i = 1; i < attributesArray.Length; i++)
-			{
-				string previousLine = attributesArray[i-1];
+            return timeSignatureBuilder.Build();
+        }
 
-				switch(previousLine.Trim().Split(' ').First())
-				{
-					case "<sign":
-						char clefTypeCharacter = attributesArray[i].Trim().First();
-						return EnumConverters.ConvertCharacterToClefTypeEnum(clefTypeCharacter);
-					default:
-						break;
-				}
-			}
-			return SJClefTypeEnum.Undefined;
-		}
+        private ulong GetTempoFromDirectionArray(string[] directionArray)
+        {
+            string elementString = "";
 
-		private SJTimeSignature GetTimeSignatureFromAttributesArray(string[] attributesArray, SJTimeSignatureBuilder timeSignatureBuilder)
-		{
-			timeSignatureBuilder.Prepare();
-			
-			for(int i = 1; i < attributesArray.Length; i++)
-			{
-				string previousLine = attributesArray[i - 1];
+            elementString = directionArray.SingleOrDefault(e => e.Contains("sound"));
 
-				switch(previousLine.Trim().Split(' ').First())
-				{
-					case "<beats":
-						uint beatsPerbar = uint.Parse(attributesArray[i].Split('<').First());
-						timeSignatureBuilder.SetNumberOfBeatsPerBar(beatsPerbar);
-						break;
-					case "<beat-type":
-						uint noteValueOfBeat = uint.Parse(attributesArray[i].Split('<').First());
-						timeSignatureBuilder.SetNoteValueOfBeat(noteValueOfBeat);
-						break;
-					default:
-						break;
-				}
-			}
+            string elementAttributesString = elementString.Substring(5);
+            string tempoString = elementAttributesString.Split('=')[1];
+            tempoString = tempoString.TrimEnd(" /".ToCharArray()).Trim("\\\"".ToCharArray());
 
-			return timeSignatureBuilder.Build();
-		}
+            tempoString = tempoString.Replace('.', ',');
 
-		private ulong GetTempoFromDirectionArray(string[] directionArray)
-		{
-			for(int i = 0; i < directionArray.Length; i++)
-			{
-				string line = directionArray[i];
+            return (ulong)double.Parse(tempoString);
+        }
 
-				switch(line.Trim().Split(' ').First())
-				{
-					case "<sound":
-						string tempoString = line.Trim().Split(' ')[1].Split('=')[1].Replace("\"", "");
-                        tempoString = tempoString.Replace('.', ',');
-                        return (ulong)double.Parse(tempoString);
-					default:
-						break;
-				}
-			}
-			return 0;
-		}
+        private SJBaseNote GetBaseNoteFromNoteArray(string[] noteArray)
+        {
+            string string1 = noteArray[0].Trim();
+            string string2 = "rest/";
 
-		private SJBaseNote GetBaseNoteFromNoteArray(string[] noteArray)
-		{
-			string string1 = noteArray[1].Trim();
-			string string2 = "<rest/";
+            Console.WriteLine(string1 + " == " + string2);
 
-			Console.WriteLine(string1 + " == " + string2);
-			if(noteArray[1].Trim() == "<rest /")
-			{
-				return GetRestFromNoteArray(noteArray);
-			} else
-			{
-				return GetNoteFromNoteArray(noteArray);
-			}
-		}
+            SJBaseNote returnValue = (noteArray[0].Trim() == "rest /") ? GetRestFromNoteArray(noteArray) : GetNoteFromNoteArray(noteArray);
+            return returnValue;
+        }
 
-		private SJRest GetRestFromNoteArray(string[] noteArray)
-		{
-			uint numberOfDots = 0;
+        private SJBaseNote GetRestFromNoteArray(string[] noteArray)
+        {
+            _noteBuilder.Prepare("R");
 
-			_noteBuilder.Prepare("R");
+            string[][] durationString = GetElementAsStringArrayArray(noteArray, "type");
+            _noteBuilder.SetDuration(EnumConverters.ConvertMusicXMLStringToSJNoteDurationEnum(durationString[0][0]));
 
-			for(int i = 1; i < noteArray.Length; i++)
-			{
-				string previousLine = noteArray[i - 1];
+            string[][] numberOfDots = GetElementAsStringArrayArray(noteArray, "dot");
+            _noteBuilder.SetNumberOfDots((uint)(numberOfDots.Count()));
 
-				switch(previousLine.Trim().Split(' ').First())
-				{
-					case "<type":
-						string durationString = noteArray[i].Split('<').First();
-						_noteBuilder.SetDuration(EnumConverters.ConvertMusicXMLStringToSJNoteDurationEnum(durationString));
-						break;
-					case "<dot":
-						numberOfDots++;
-						break;
-					default:
-						break;
-				}
-			}
+            return (SJRest)_noteBuilder.Build();
+        }
 
-			_noteBuilder.SetNumberOfDots(numberOfDots);
-			return (SJRest)_noteBuilder.Build();
-		}
+        private SJBaseNote GetNoteFromNoteArray(string[] noteArray)
+        {
 
-		private SJNote GetNoteFromNoteArray(string[] noteArray)
-		{
-			int indexOfPitchStart = 0;
-			int indexOfPitchEnd = 0;
+            int alteration = 0;
 
-			uint numberOfDots = 0;
-			int alteration = 0;
+            _noteBuilder.Prepare("N");
 
-			_noteBuilder.Prepare("N");
+            string[][] pitches = GetElementAsStringArrayArray(noteArray, "pitch");
+            foreach (string[] pitch in pitches)
+            {
+                _noteBuilder.SetOctave(GetOctaveFromPitchArray(pitch));
+                _noteBuilder.SetPitch(GetPitchEnumFromPitchArray(pitch));
+            }
 
-			for(int i = 1; i < noteArray.Length; i++)
-			{
-				string previousLine = noteArray[i - 1];
+            string[][] durationString = GetElementAsStringArrayArray(noteArray, "type");
+            _noteBuilder.SetDuration(EnumConverters.ConvertMusicXMLStringToSJNoteDurationEnum(durationString[0][0]));
 
-				switch(previousLine.Trim().Split(' ').First())
-				{
-					case "<pitch":
-						indexOfPitchStart = i - 1;
-						break;
-					case "</pitch":
-						indexOfPitchEnd = i - 1;
-						string[] pitchArray = noteArray.Skip(indexOfPitchStart).Take(indexOfPitchEnd - indexOfPitchStart + 1).ToArray();
-						_noteBuilder.SetOctave(GetOctaveFromPitchArray(pitchArray));
-						_noteBuilder.SetPitch(GetPitchEnumFromPitchArray(pitchArray));
-						break;
-					case "<type":
-						string durationString = noteArray[i].Trim().Split('<').First().Trim();
-						_noteBuilder.SetDuration(EnumConverters.ConvertMusicXMLStringToSJNoteDurationEnum(durationString));
-						break;
-					case "<dot":
-						numberOfDots++;
-						break;
-					case "<accidental":
-						string accidentalString = noteArray[i].Split('<').First();
-						if(accidentalString == "sharp")
-						{
-							alteration += 1;
-						}
-						else if(accidentalString == "flat")
-						{
-							alteration -= 1;
-						}
-						break;
-					default:
-						break;
-				}
-			}
+            string[][] numberOfDots = GetElementAsStringArrayArray(noteArray, "dot");
+            _noteBuilder.SetNumberOfDots((uint)(numberOfDots.Count()));
 
-			_noteBuilder.SetPitchAlteration(alteration);
-			_noteBuilder.SetNumberOfDots(numberOfDots);
-			return (SJNote)_noteBuilder.Build();
-		}
+            string[][] accidentals = GetElementAsStringArrayArray(noteArray, "accidental");
+            foreach (var accidental in accidentals)
+            {
+                if (accidental[0] == "sharp")
+                {
+                    alteration += 1;
+                }
+                else if (accidental[0] == "flat")
+                {
+                    alteration -= 1;
+                }
+            }
 
-		private SJUnheardNote GetCentralCUnheardNote()
-		{
-			_noteBuilder.Prepare("U");
+            _noteBuilder.SetPitchAlteration(alteration);
+            return (SJNote)_noteBuilder.Build();
+        }
 
-			_noteBuilder.SetPitch(SJPitchEnum.C);
-			_noteBuilder.SetOctave(4);
-			_noteBuilder.SetPitchAlteration(0);
+        private SJUnheardNote GetCentralCUnheardNote()
+        {
+            _noteBuilder.Prepare("U");
 
-			return (SJUnheardNote)_noteBuilder.Build();
-		}
+            _noteBuilder.SetPitch(SJPitchEnum.C);
+            _noteBuilder.SetOctave(4);
+            _noteBuilder.SetPitchAlteration(0);
 
-		private int GetOctaveFromPitchArray(string[] pitchArray)
-		{
-			for(int i = 1; i < pitchArray.Length; i++)
-			{
-				string previousLine = pitchArray[i - 1];
+            return (SJUnheardNote)_noteBuilder.Build();
+        }
 
-				switch(previousLine.Trim().Split(' ').First())
-				{
-					case "<octave":
-						int octave = int.Parse(pitchArray[i].Trim().First().ToString());
-						return octave;
-					default:
-						break;
-				}
-			}
-			return 0;
-		}
+        private int GetOctaveFromPitchArray(string[] pitchArray)
+        {
+            string[][] octave = GetElementAsStringArrayArray(pitchArray, "octave");
+            return int.Parse(octave[0][0]);
+        }
 
-		private SJPitchEnum GetPitchEnumFromPitchArray(string[] pitchArray)
-		{
-			for(int i = 1; i < pitchArray.Length; i++)
-			{
-				string previousLine = pitchArray[i - 1];
+        private SJPitchEnum GetPitchEnumFromPitchArray(string[] pitchArray)
+        {
+            string[][] step = GetElementAsStringArrayArray(pitchArray, "step");
+            return EnumConverters.ConvertCharToSJNotePitchEnum(step[0][0][0]);
+        }
 
-				switch(previousLine.Trim().Split(' ').First())
-				{
-					case "<step":
-						char pitchCharacter = pitchArray[i].Trim().First();
-						return EnumConverters.ConvertCharToSJNotePitchEnum(pitchCharacter);
-					default:
-						break;
-				}
-			}
-			return SJPitchEnum.Undefined;
-		}
-	}
+        //To Change name
+        private string[][] GetElementAsStringArrayArray(string[] xmlStringArray, string elementName)
+        {
+            List<string[]> returnArray = new List<string[]>();
+
+            int indexOfMeasureStart = 0;
+
+            for (int i = 0; i < xmlStringArray.Length; i++)
+            {
+                string line = xmlStringArray[i];
+
+                string elementOpeningTag = elementName;
+                string elementClosingTag = "/" + elementName;
+
+                if (line.Trim().Split(' ').First() == elementOpeningTag)
+                {
+                    indexOfMeasureStart = i;
+                }
+                if (line.Trim().Split(' ').First() == elementClosingTag)
+                {
+                    int indexOfMeasureEnd = i;
+                    string[] elementStringArray = xmlStringArray.Skip(indexOfMeasureStart + 1).Take(indexOfMeasureEnd - indexOfMeasureStart - 1).ToArray();
+                    returnArray.Add(elementStringArray);
+                }
+            }
+
+            return returnArray.ToArray();
+        }
+    }
 }
