@@ -14,7 +14,8 @@ namespace DPA_Musicsheets.ViewModels
 {
     public class LilypondViewModel : ViewModelBase
     {
-		private FileHandler _fileHandler;
+        private FileHandler _fileHandler;
+        private SJFileReader _fileReader;
 
         private string _text;
         private string _previousText;
@@ -39,21 +40,21 @@ namespace DPA_Musicsheets.ViewModels
         private static int MILLISECONDS_BEFORE_CHANGE_HANDLED = 1500;
         private bool _waitingForRender = false;
 
-		public LilypondViewModel(FileHandler fileHandler)
-		{
-			_fileHandler = fileHandler;
+        public LilypondViewModel(SJFileReader fileReader)
+        {
+            _fileReader = fileReader;
 
-			SJLilypondStateHandler.StateDataChanged += (src, e) =>
-			{
-				_textChangedByLoad = true;
-				LilypondText = _previousText = e.LilypondText;
-				_textChangedByLoad = false;
-			};
+            SJLilypondStateHandler.StateDataChanged += (src, e) =>
+            {
+                _textChangedByLoad = true;
+                LilypondText = _previousText = e.LilypondText;
+                _textChangedByLoad = false;
+            };
 
-			_text = "Your lilypond text will appear here.";
-		}
+            _text = "Your lilypond text will appear here.";
+        }
 
-		public ICommand TextChangedCommand => new RelayCommand<TextChangedEventArgs>((args) =>
+        public ICommand TextChangedCommand => new RelayCommand<TextChangedEventArgs>((args) =>
         {
             if (!_textChangedByLoad)
             {
@@ -68,7 +69,7 @@ namespace DPA_Musicsheets.ViewModels
                         _waitingForRender = false;
                         UndoCommand.RaiseCanExecuteChanged();
 
-                        _fileHandler.LoadLilypond(LilypondText);
+                        _fileReader.RefreshLilypond(LilypondText);
                     }
                 }, TaskScheduler.FromCurrentSynchronizationContext()); // Request from main thread.
             }

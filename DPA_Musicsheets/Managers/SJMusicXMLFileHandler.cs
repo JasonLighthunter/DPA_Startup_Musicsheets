@@ -9,30 +9,30 @@ using System.IO;
 
 namespace DPA_Musicsheets.Managers
 {
-	public class SJMusicXMLFileHandler : ISJFileHandler
-	{
-		public string MusicXMLText;
-		public SJSong Song;
+    public class SJMusicXMLFileHandler : ISJFileHandler
+    {
+        public string MusicXMLText;
+        public SJSong Song;
 
-		private SJMusicXMLParser _musicXMLParser;
+        private SJMusicXMLParser _musicXMLParser;
 
-		public SJMusicXMLFileHandler(SJMusicXMLParser musicXMLParser)
-		{
-			_musicXMLParser = musicXMLParser;
-		}
+        public SJMusicXMLFileHandler(SJMusicXMLParser musicXMLParser)
+        {
+            _musicXMLParser = musicXMLParser;
+        }
 
-		public SJSong LoadSong(string fileName)
-		{
-			StringBuilder sb = new StringBuilder();
-			foreach(var line in File.ReadAllLines(fileName))
-			{
-				sb.AppendLine(line);
-			}
+        public SJSong LoadSongFromFile(string fileName)
+        {
+            StringBuilder sb = new StringBuilder();
+            foreach (var line in File.ReadAllLines(fileName))
+            {
+                sb.AppendLine(line);
+            }
 
-			MusicXMLText = sb.ToString();
+            MusicXMLText = sb.ToString();
 
-			Song = _musicXMLParser.ParseToSJSong(MusicXMLText);
-			return Song;
-		}
-	}
+            SJSong song = _musicXMLParser.ParseToSJSong(MusicXMLText);
+            return song;
+        }
+    }
 }

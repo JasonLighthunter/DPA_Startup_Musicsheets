@@ -16,7 +16,7 @@ namespace DPA_Musicsheets.Managers
         //private SJFileHandlerFactory _fileHandlerFactory { get; set; }
         private ISJFileHandler _midiFileHandler { get; set; }
         private ISJFileHandler _lilypondFileHandler { get; set; }
-		private ISJFileHandler _musicXMLFileHandler { get; set; }
+        private ISJFileHandler _musicXMLFileHandler { get; set; }
 
         private SJLilypondParser _lilypondParser;
         private SJMidiParser _midiParser;
@@ -33,8 +33,8 @@ namespace DPA_Musicsheets.Managers
             //_fileHandlerFactory.AddFileHandlerType(".ly", typeof(SJLilypondFileHandler));
 
             _midiFileHandler = midiFileHandler;
-			_lilypondFileHandler = lilypondFileHandler;
-			_musicXMLFileHandler = musicXMLFileHandler;
+            _lilypondFileHandler = lilypondFileHandler;
+            _musicXMLFileHandler = musicXMLFileHandler;
 
             _lilypondParser = lilypondParser;
             _midiParser = midiParser;
@@ -55,18 +55,18 @@ namespace DPA_Musicsheets.Managers
                 switch (fileExtension)
                 {
                     case ".mid":
-                        song = _midiFileHandler.LoadSong(fileName);
+                        song = _midiFileHandler.LoadSongFromFile(fileName);
                         break;
                     case ".ly":
-                        song = _lilypondFileHandler.LoadSong(fileName);
+                        song = _lilypondFileHandler.LoadSongFromFile(fileName);
                         break;
-					case ".xml":
-						song = _musicXMLFileHandler.LoadSong(fileName);
-						break;
+                    case ".xml":
+                        song = _musicXMLFileHandler.LoadSongFromFile(fileName);
+                        break;
                     default:
                         break;
                 }
-                 
+
                 Sequence midiSequence = _midiParser.ParseFromSJSong(song);
                 string lilypondContent = _lilypondParser.ParseFromSJSong(song);
                 IEnumerable<MusicalSymbol> symbols = _staffsParser.ParseFromSJSong(song);
@@ -79,6 +79,25 @@ namespace DPA_Musicsheets.Managers
             {
                 Console.WriteLine(e.StackTrace);
                 throw new NotSupportedException($"File extension {Path.GetExtension(fileName)} is not supported.");
+            }
+        }
+
+        public void RefreshLilypond(string lilypondText)
+        {
+            try
+            {
+                var song = ((SJLilypondFileHandler)_lilypondFileHandler).LoadSongFromString(lilypondText);
+
+                Sequence midiSequence = _midiParser.ParseFromSJSong(song);
+                IEnumerable<MusicalSymbol> symbols = _staffsParser.ParseFromSJSong(song);
+
+                midiStateHandler.UpdateData(midiSequence);
+                staffsStateHandler.UpdateData(symbols);
+            }
+            catch (ArgumentException e)
+            {
+                Console.WriteLine(e.StackTrace);
+                throw e;
             }
         }
     }

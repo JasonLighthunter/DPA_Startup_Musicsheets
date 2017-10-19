@@ -27,7 +27,7 @@ namespace DPA_Musicsheets.Parsers
         private Dictionary<MessageType, Action<MidiEvent>> _midiToSJSongMessageParserDicionary { get; set; }
 
         private SJNoteBuilder _noteBuilder { get; set; }
-        
+
         private int absoluteTicks = 0;
         #endregion
 
@@ -69,6 +69,7 @@ namespace DPA_Musicsheets.Parsers
         public Sequence ParseFromSJSong(SJSong song)
         {
             Sequence midiSequence = new Sequence();
+            absoluteTicks = 0;
 
             Track metaTrack = new Track();
             midiSequence.Add(metaTrack);
@@ -115,7 +116,7 @@ namespace DPA_Musicsheets.Parsers
             for (int i = 0; i < data.Count(); i++) //voor elke track in de sequence
             {
                 Track track = data[i];//selecteer een track
-                
+
                 foreach (var midiEvent in track.Iterator())//loop door elk event per track
                 {
                     IMidiMessage midiMessage = midiEvent.MidiMessage;
@@ -129,7 +130,7 @@ namespace DPA_Musicsheets.Parsers
 
         #region privateMethods
         #region privateMethodsFromSJSong
-        
+
         private byte[] GetMidiTempo(ulong songTempo)
         {
             int speed = (int)(60000000 / songTempo);
@@ -138,7 +139,7 @@ namespace DPA_Musicsheets.Parsers
             tempo[0] = (byte)((speed >> 16) & 0xff);
             tempo[1] = (byte)((speed >> 8) & 0xff);
             tempo[2] = (byte)(speed & 0xff);
-            
+
             return tempo;
         }
 

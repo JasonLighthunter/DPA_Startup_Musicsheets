@@ -13,24 +13,19 @@ namespace DPA_Musicsheets.Managers
 {
     public class SJMidiFileHandler : ISJFileHandler
     {
-        public Sequence MidiSequence { get; set; }
-		public SJSong Song { get; set; }
-
-        private SJMidiStateHandler midiStateHandler = new SJMidiStateHandler();
-		private SJMidiParser _midiParser;
+        private SJMidiParser _midiParser;
 
         public SJMidiFileHandler(SJMidiParser midiParser)
         {
             _midiParser = midiParser;
         }
 
-        public SJSong LoadSong(string fileName)
+        public SJSong LoadSongFromFile(string fileName)
         {
-            MidiSequence = new Sequence();
-            MidiSequence.Load(fileName);
-            midiStateHandler.UpdateData(MidiSequence);
-			Song = _midiParser.ParseToSJSong(MidiSequence);
-            return Song;
+            Sequence midiSequence = new Sequence();
+            midiSequence.Load(fileName);
+            SJSong song = _midiParser.ParseToSJSong(midiSequence);
+            return song;
         }
     }
 }

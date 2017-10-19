@@ -9,6 +9,6 @@ namespace DPA_Musicsheets.Managers
 {
     public interface ISJFileHandler
     {
-        SJSong LoadSong(string fileName);
+        SJSong LoadSongFromFile(string fileName);
     }
 }
