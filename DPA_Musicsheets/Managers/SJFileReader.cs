@@ -4,16 +4,19 @@ using PSAMControlLibrary;
 using Sanford.Multimedia.Midi;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace DPA_Musicsheets.Managers
 {
     public class SJFileReader
     {
-        //private SJFileHandlerFactory _fileHandlerFactory { get; set; }
+        //private SJFileHandlerFactory _fileHandlerFactory { get; set; 
+        private SJSong _currentSong { get; set; }
         private ISJFileHandler _midiFileHandler { get; set; }
         private ISJFileHandler _lilypondFileHandler { get; set; }
         private ISJFileHandler _musicXMLFileHandler { get; set; }
@@ -74,6 +77,8 @@ namespace DPA_Musicsheets.Managers
                 lilypondStateHandler.UpdateData(lilypondContent);
                 midiStateHandler.UpdateData(midiSequence);
                 staffsStateHandler.UpdateData(symbols);
+
+                _currentSong = song;
             }
             catch (ArgumentException e)
             {
@@ -100,5 +105,82 @@ namespace DPA_Musicsheets.Managers
                 throw e;
             }
         }
+
+        public void SaveToFile(string fileName)
+        {
+
+            string extension = Path.GetExtension(fileName);
+            if (extension.EndsWith(".mid"))
+            {
+                SaveToMidi(fileName);
+            }
+            else if (extension.EndsWith(".ly"))
+            {
+                SaveToLilypond(fileName);
+            }
+            else if (extension.EndsWith(".pdf"))
+            {
+                SaveToPDF(fileName);
+            }
+            else
+            {
+                throw new Exception();
+                //MessageBox.Show($"Extension {extension} is not supported.");
+            }
+        }
+
+        #region Saving to files
+        internal void SaveToMidi(string fileName)
+        {
+            Sequence sequence = _midiParser.ParseFromSJSong(_currentSong);
+
+            sequence.Save(fileName);
+        }
+
+        internal void SaveToPDF(string fileName)
+        {
+            string tmpFileName = $"{fileName}-tmp.ly";
+            SaveToLilypond(tmpFileName);
+
+            string lilypondLocation = @"C:\Program Files (x86)\LilyPond\usr\bin\lilypond.exe";
+            string sourceFolder = Path.GetDirectoryName(tmpFileName);
+            string sourceFileName = Path.GetFileNameWithoutExtension(tmpFileName);
+            string targetFolder = Path.GetDirectoryName(fileName);
+            string targetFileName = Path.GetFileNameWithoutExtension(fileName);
+
+            var process = new Process
+            {
+                StartInfo =
+                {
+                    WorkingDirectory = sourceFolder,
+                    WindowStyle = ProcessWindowStyle.Hidden,
+                    Arguments = String.Format("--pdf \"{0}\\{1}.ly\"", sourceFolder, sourceFileName),
+                    FileName = lilypondLocation
+                }
+            };
+
+            process.Start();
+            while (!process.HasExited)
+            { /* Wait for exit */
+            }
+            if (sourceFolder != targetFolder || sourceFileName != targetFileName)
+            {
+                File.Move(sourceFolder + "\\" + sourceFileName + ".pdf", targetFolder + "\\" + targetFileName + ".pdf");
+                File.Delete(tmpFileName);
+            }
+        }
+
+        internal void SaveToLilypond(string fileName)
+        {
+            var lilypondContent = _lilypondParser.ParseFromSJSong(_currentSong);
+            using (StreamWriter outputFile = new StreamWriter(fileName))
+            {
+                outputFile.Write(lilypondContent);
+                outputFile.Close();
+            }
+        }
+
+        #endregion Saving to files
+
     }
 }

@@ -95,23 +95,24 @@ namespace DPA_Musicsheets.ViewModels
             SaveFileDialog saveFileDialog = new SaveFileDialog() { Filter = "Midi|*.mid|Lilypond|*.ly|PDF|*.pdf" };
             if (saveFileDialog.ShowDialog() == true)
             {
-                string extension = Path.GetExtension(saveFileDialog.FileName);
-                if (extension.EndsWith(".mid"))
-                {
-                    _fileHandler.SaveToMidi(saveFileDialog.FileName);
-                }
-                else if (extension.EndsWith(".ly"))
-                {
-                    _fileHandler.SaveToLilypond(saveFileDialog.FileName);
-                }
-                else if (extension.EndsWith(".pdf"))
-                {
-                    _fileHandler.SaveToPDF(saveFileDialog.FileName);
-                }
-                else
-                {
-                    MessageBox.Show($"Extension {extension} is not supported.");
-                }
+                _fileReader.SaveToFile(saveFileDialog.FileName);
+                //string extension = Path.GetExtension(saveFileDialog.FileName);
+                //if (extension.EndsWith(".mid"))
+                //{
+                //    _fileHandler.SaveToMidi(saveFileDialog.FileName);
+                //}
+                //else if (extension.EndsWith(".ly"))
+                //{
+                //    _fileHandler.SaveToLilypond(saveFileDialog.FileName);
+                //}
+                //else if (extension.EndsWith(".pdf"))
+                //{
+                //    _fileHandler.SaveToPDF(saveFileDialog.FileName);
+                //}
+                //else
+                //{
+                //    MessageBox.Show($"Extension {extension} is not supported.");
+                //}
             }
         });
     }
