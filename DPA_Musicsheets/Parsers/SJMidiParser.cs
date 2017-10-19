@@ -77,7 +77,6 @@ namespace DPA_Musicsheets.Parsers
             byte[] tempo = GetMidiTempo(song.Tempo);
             metaTrack.Insert(0 /* Insert at 0 ticks*/, new MetaMessage(MetaType.Tempo, tempo));
 
-
             byte[] timeSignature = GetMidiTimeSignature(song.TimeSignature);
             metaTrack.Insert(absoluteTicks, new MetaMessage(MetaType.TimeSignature, timeSignature));
 
