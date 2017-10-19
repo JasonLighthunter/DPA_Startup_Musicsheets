@@ -14,7 +14,6 @@ namespace DPA_Musicsheets.ViewModels
 {
     public class LilypondViewModel : ViewModelBase
     {
-        private FileHandler _fileHandler;
         private SJFileReader _fileReader;
 
         private string _text;

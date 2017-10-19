@@ -106,6 +106,7 @@ namespace DPA_Musicsheets.Managers
             }
         }
 
+        #region Saving to files
         public void SaveToFile(string fileName)
         {
 
@@ -129,7 +130,6 @@ namespace DPA_Musicsheets.Managers
             }
         }
 
-        #region Saving to files
         internal void SaveToMidi(string fileName)
         {
             Sequence sequence = _midiParser.ParseFromSJSong(_currentSong);
