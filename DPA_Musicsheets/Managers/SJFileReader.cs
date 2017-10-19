@@ -15,6 +15,15 @@ namespace DPA_Musicsheets.Managers
 {
     public class SJFileReader
     {
+        private bool _isSavedSinceChange;
+
+        public bool IsSavedSinceChange
+        {
+            get { return _isSavedSinceChange; }
+            set { _isSavedSinceChange = value; }
+        }
+
+
         //private SJFileHandlerFactory _fileHandlerFactory { get; set; 
         private SJSong _currentSong { get; set; }
         private ISJFileHandler _midiFileHandler { get; set; }
@@ -101,32 +110,29 @@ namespace DPA_Musicsheets.Managers
             }
             catch (ArgumentException e)
             {
-                Console.WriteLine(e.StackTrace);
-                throw e;
+                //Console.WriteLine(e.StackTrace);
+                //throw e;
             }
         }
 
         #region Saving to files
         public void SaveToFile(string fileName)
         {
-
             string extension = Path.GetExtension(fileName);
             if (extension.EndsWith(".mid"))
             {
                 SaveToMidi(fileName);
+                _isSavedSinceChange = true;
             }
             else if (extension.EndsWith(".ly"))
             {
                 SaveToLilypond(fileName);
+                _isSavedSinceChange = true;
             }
             else if (extension.EndsWith(".pdf"))
             {
                 SaveToPDF(fileName);
-            }
-            else
-            {
-                throw new Exception();
-                //MessageBox.Show($"Extension {extension} is not supported.");
+                _isSavedSinceChange = true;
             }
         }
 

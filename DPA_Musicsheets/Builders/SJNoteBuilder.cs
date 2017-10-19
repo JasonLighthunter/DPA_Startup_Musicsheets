@@ -27,7 +27,7 @@ namespace DPA_Musicsheets.Builders
 
         public void SetPitch(SJPitchEnum pitch)
         {
-            if(note is SJNote)
+            if (note is SJNote)
             {
                 ((SJNote)note).Pitch = pitch;
             }
@@ -67,7 +67,6 @@ namespace DPA_Musicsheets.Builders
                 {
                     throw new ArgumentException();
                 }
-				Console.WriteLine("NoteMade");
                 return note;
             }
             throw new ArgumentException();

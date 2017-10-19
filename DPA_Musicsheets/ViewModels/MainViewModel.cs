@@ -8,6 +8,7 @@ using PSAMWPFControlLibrary;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -34,22 +35,22 @@ namespace DPA_Musicsheets.ViewModels
         {
             get { return _currentState; }
             set
-			{
-				_currentState = value;
-				RaisePropertyChanged(() => CurrentState);
-			}
+            {
+                _currentState = value;
+                RaisePropertyChanged(() => CurrentState);
+            }
         }
 
         //private FileHandler _fileHandler;
         private SJFileReader _fileReader;
 
-		//public MainViewModel(FileHandler fileHandler)
-		//{ 
-		//	_fileHandler = fileHandler;
-		//	FileName = @"files/alle-eendjes-zwemmen-in-het-water.mid";
+        //public MainViewModel(FileHandler fileHandler)
+        //{ 
+        //	_fileHandler = fileHandler;
+        //	FileName = @"files/alle-eendjes-zwemmen-in-het-water.mid";
 
-		//	MessengerInstance.Register<CurrentStateMessage>(this, (message) => CurrentState = message.State);
-		//}
+        //	MessengerInstance.Register<CurrentStateMessage>(this, (message) => CurrentState = message.State);
+        //}
 
         public MainViewModel(SJFileReader fileReader)
         {
@@ -94,6 +95,23 @@ namespace DPA_Musicsheets.ViewModels
 
         public ICommand OnWindowClosingCommand => new RelayCommand(() =>
         {
+            if (!_fileReader.IsSavedSinceChange)
+            {
+                MessageBoxButton button = MessageBoxButton.YesNo;
+                var result = MessageBox.Show("Veranderingen zijn nog niet opgeslagen. Wilt u dit alsnog doen?", "Veranderingen zijn nog niet opgeslagen.", button);
+                if (result == MessageBoxResult.Yes)
+                {
+                    SaveFileDialog saveFileDialog = new SaveFileDialog() { Filter = "Midi|*.mid|Lilypond|*.ly|PDF|*.pdf" };
+                    if (saveFileDialog.ShowDialog() == true)
+                    {
+                        _fileReader.SaveToFile(saveFileDialog.FileName);
+                        if (!_fileReader.IsSavedSinceChange)
+                        {
+                            MessageBox.Show($"Extension {Path.GetExtension(saveFileDialog.FileName)} is not supported.");
+                        }
+                    }
+                }
+            }
             ViewModelLocator.Cleanup();
         });
     }

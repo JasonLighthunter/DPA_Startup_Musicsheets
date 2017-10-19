@@ -45,6 +45,7 @@ namespace DPA_Musicsheets.ViewModels
 
             SJLilypondStateHandler.StateDataChanged += (src, e) =>
             {
+                _fileReader.IsSavedSinceChange = true;
                 _textChangedByLoad = true;
                 LilypondText = _previousText = e.LilypondText;
                 _textChangedByLoad = false;
@@ -57,6 +58,7 @@ namespace DPA_Musicsheets.ViewModels
         {
             if (!_textChangedByLoad)
             {
+                _fileReader.IsSavedSinceChange = false;
                 _waitingForRender = true;
                 _lastChange = DateTime.Now;
                 MessengerInstance.Send(new CurrentStateMessage() { State = "Rendering..." });
@@ -95,6 +97,10 @@ namespace DPA_Musicsheets.ViewModels
             if (saveFileDialog.ShowDialog() == true)
             {
                 _fileReader.SaveToFile(saveFileDialog.FileName);
+                if (!_fileReader.IsSavedSinceChange)
+                {
+                    MessageBox.Show($"Extension {Path.GetExtension(saveFileDialog.FileName)} is not supported.");
+                }
                 //string extension = Path.GetExtension(saveFileDialog.FileName);
                 //if (extension.EndsWith(".mid"))
                 //{
