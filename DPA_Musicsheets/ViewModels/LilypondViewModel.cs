@@ -101,23 +101,6 @@ namespace DPA_Musicsheets.ViewModels
                 {
                     MessageBox.Show($"Extension {Path.GetExtension(saveFileDialog.FileName)} is not supported.");
                 }
-                //string extension = Path.GetExtension(saveFileDialog.FileName);
-                //if (extension.EndsWith(".mid"))
-                //{
-                //    _fileHandler.SaveToMidi(saveFileDialog.FileName);
-                //}
-                //else if (extension.EndsWith(".ly"))
-                //{
-                //    _fileHandler.SaveToLilypond(saveFileDialog.FileName);
-                //}
-                //else if (extension.EndsWith(".pdf"))
-                //{
-                //    _fileHandler.SaveToPDF(saveFileDialog.FileName);
-                //}
-                //else
-                //{
-                //    MessageBox.Show($"Extension {extension} is not supported.");
-                //}
             }
         });
     }

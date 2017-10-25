@@ -17,40 +17,33 @@ using System.Windows.Input;
 
 namespace DPA_Musicsheets.ViewModels
 {
-    public class MainViewModel : ViewModelBase
-    {
-        private string _fileName;
-        public string FileName
-        {
-            get { return _fileName; }
-            set
-            {
-                _fileName = value;
-                RaisePropertyChanged(() => FileName);
-            }
-        }
+	public class MainViewModel : ViewModelBase
+	{
+		private string _fileName;
+		public string FileName
+		{
+			get { return _fileName; }
+			set
+			{
+				_fileName = value;
+				RaisePropertyChanged(() => FileName);
+			}
+		}
 
-        private string _currentState;
-        public string CurrentState
-        {
-            get { return _currentState; }
-            set
-            {
-                _currentState = value;
-                RaisePropertyChanged(() => CurrentState);
-            }
-        }
+		private string _currentState;
+		public string CurrentState
+		{
+			get { return _currentState; }
+			set
+			{
+				_currentState = value;
+				RaisePropertyChanged(() => CurrentState);
+			}
+		}
 
-        //private FileHandler _fileHandler;
+		private HashSet<string> pressedKeys = new HashSet<string>();
+
         private SJFileReader _fileReader;
-
-        //public MainViewModel(FileHandler fileHandler)
-        //{ 
-        //	_fileHandler = fileHandler;
-        //	FileName = @"files/alle-eendjes-zwemmen-in-het-water.mid";
-
-        //	MessengerInstance.Register<CurrentStateMessage>(this, (message) => CurrentState = message.State);
-        //}
 
         public MainViewModel(SJFileReader fileReader)
         {
@@ -58,20 +51,18 @@ namespace DPA_Musicsheets.ViewModels
             FileName = @"files/alle-eendjes-zwemmen-in-het-water.mid";
 
             MessengerInstance.Register<CurrentStateMessage>(this, (message) => CurrentState = message.State);
-        }
+		}
 
-        public ICommand OpenFileCommand => new RelayCommand(() =>
-        {
-            OpenFileDialog openFileDialog = new OpenFileDialog() { Filter = "Midi, LilyPond or MusicXML files (*.mid *.ly *.xml)|*.mid;*.ly;*.xml" };
-            if (openFileDialog.ShowDialog() == true)
-            {
-                FileName = openFileDialog.FileName;
-            }
-        });
-        //public ICommand LoadCommand => new RelayCommand(() =>
-        //{
-        //	_fileHandler.OpenFile(FileName);
-        //});
+		private void OpenFileDialogAction()
+		{
+			OpenFileDialog openFileDialog = new OpenFileDialog() { Filter = "Midi, LilyPond or MusicXML files (*.mid *.ly *.xml)|*.mid;*.ly;*.xml" };
+			if(openFileDialog.ShowDialog() == true)
+			{
+				FileName = openFileDialog.FileName;
+			}
+		}
+
+        public ICommand OpenFileCommand => new RelayCommand(() => { OpenFileDialogAction(); });
 
         public ICommand LoadCommand => new RelayCommand(() =>
         {
@@ -86,11 +77,31 @@ namespace DPA_Musicsheets.ViewModels
         public ICommand OnKeyDownCommand => new RelayCommand<KeyEventArgs>((e) =>
         {
             Console.WriteLine($"Key down: {e.Key}");
-        });
+			pressedKeys.Add(e.Key.ToString());
+			CheckPressedKeysForCombination();
+		});
 
-        public ICommand OnKeyUpCommand => new RelayCommand(() =>
+		private void CheckPressedKeysForCombination()
+		{
+			HashSet<string> saveLilypondSet = new HashSet<string>{ "S", "LeftCtrl" };
+			HashSet<string> openFileSet = new HashSet<string> { "LeftCtrl", "O" };
+
+			if(pressedKeys.SetEquals(saveLilypondSet))
+			{
+				SaveAsLilypondAction();
+			}
+			else if(pressedKeys.SetEquals(openFileSet))
+			{
+				OpenFileDialogAction();
+			}
+		}
+
+		private void SaveAsLilypondAction() => _fileReader.SaveToLilypond(_fileName);
+
+		public ICommand OnKeyUpCommand => new RelayCommand<KeyEventArgs>((e) =>
         {
             Console.WriteLine("Key Up");
+			pressedKeys.Remove(e.Key.ToString());
         });
 
         public ICommand OnWindowClosingCommand => new RelayCommand(() =>

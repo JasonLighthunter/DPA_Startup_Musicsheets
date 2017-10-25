@@ -15,14 +15,12 @@ namespace DPA_Musicsheets.Managers
 {
     public class SJFileReader
     {
-        private bool _isSavedSinceChange;
-
+		private bool _isSavedSinceChange = true;
         public bool IsSavedSinceChange
         {
             get { return _isSavedSinceChange; }
             set { _isSavedSinceChange = value; }
         }
-
 
         //private SJFileHandlerFactory _fileHandlerFactory { get; set; 
         private SJSong _currentSong { get; set; }
@@ -107,6 +105,8 @@ namespace DPA_Musicsheets.Managers
 
                 midiStateHandler.UpdateData(midiSequence);
                 staffsStateHandler.UpdateData(symbols);
+
+				_currentSong = song;
             }
             catch (ArgumentException e)
             {
@@ -122,17 +122,14 @@ namespace DPA_Musicsheets.Managers
             if (extension.EndsWith(".mid"))
             {
                 SaveToMidi(fileName);
-                _isSavedSinceChange = true;
             }
             else if (extension.EndsWith(".ly"))
             {
                 SaveToLilypond(fileName);
-                _isSavedSinceChange = true;
             }
             else if (extension.EndsWith(".pdf"))
             {
                 SaveToPDF(fileName);
-                _isSavedSinceChange = true;
             }
         }
 
@@ -141,9 +138,10 @@ namespace DPA_Musicsheets.Managers
             Sequence sequence = _midiParser.ParseFromSJSong(_currentSong);
 
             sequence.Save(fileName);
-        }
+			_isSavedSinceChange = true;
+		}
 
-        internal void SaveToPDF(string fileName)
+		internal void SaveToPDF(string fileName)
         {
             string tmpFileName = $"{fileName}-tmp.ly";
             SaveToLilypond(tmpFileName);
@@ -174,9 +172,10 @@ namespace DPA_Musicsheets.Managers
                 File.Move(sourceFolder + "\\" + sourceFileName + ".pdf", targetFolder + "\\" + targetFileName + ".pdf");
                 File.Delete(tmpFileName);
             }
-        }
+			_isSavedSinceChange = true;
+		}
 
-        internal void SaveToLilypond(string fileName)
+		internal void SaveToLilypond(string fileName)
         {
             var lilypondContent = _lilypondParser.ParseFromSJSong(_currentSong);
             using (StreamWriter outputFile = new StreamWriter(fileName))
@@ -184,9 +183,10 @@ namespace DPA_Musicsheets.Managers
                 outputFile.Write(lilypondContent);
                 outputFile.Close();
             }
-        }
+			_isSavedSinceChange = true;
+		}
 
-        #endregion Saving to files
+		#endregion Saving to files
 
-    }
+	}
 }
