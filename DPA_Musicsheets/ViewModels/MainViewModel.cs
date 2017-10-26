@@ -83,10 +83,26 @@ namespace DPA_Musicsheets.ViewModels
 
 		private void CheckPressedKeysForCombination()
 		{
+			HashSet<string> savePdfSet = new HashSet<string> { "S", "LeftCtrl", "P" };
 			HashSet<string> saveLilypondSet = new HashSet<string>{ "S", "LeftCtrl" };
+
 			HashSet<string> openFileSet = new HashSet<string> { "LeftCtrl", "O" };
 
-			if(pressedKeys.SetEquals(saveLilypondSet))
+			HashSet<string> insertTrebleSet = new HashSet<string> { "System", "C" };
+			HashSet<string> insertTempoFourHundredTwentySet = new HashSet<string> { "System", "S" };
+
+			HashSet<string> insertTimeSignatureDefaultSet = new HashSet<string> { "System", "T" };
+			HashSet<string> insertTimeSignatureFourFourSet = new HashSet<string> { "System", "T", "4" };
+			HashSet<string> insertTimeSignatureThreeFourSet = new HashSet<string> { "System", "T", "3" };
+			HashSet<string> insertTimeSignatureSixEightSet = new HashSet<string> { "System", "T", "6" };
+
+			HashSet<string> insertMissingBarLinesSet = new HashSet<string> { "System", "B"};
+
+			if (pressedKeys.SetEquals(savePdfSet))
+			{
+				SaveAsPdfAction();
+			}
+			else if(pressedKeys.SetEquals(saveLilypondSet))
 			{
 				SaveAsLilypondAction();
 			}
@@ -94,9 +110,65 @@ namespace DPA_Musicsheets.ViewModels
 			{
 				OpenFileDialogAction();
 			}
+			else if(pressedKeys.SetEquals(insertTrebleSet))
+			{
+				InsertTrebleAction();
+			}
+			else if(pressedKeys.SetEquals(insertTempoFourHundredTwentySet))
+			{
+				InsertTempoFourHundredTwentyAction();
+			}
+			else if(pressedKeys.SetEquals(insertTimeSignatureDefaultSet) || pressedKeys.SetEquals(insertTimeSignatureFourFourSet))
+			{
+				InsertTimeSignatureFourFourAction();
+			}
+			else if(pressedKeys.SetEquals(insertTimeSignatureThreeFourSet))
+			{
+				InsertTimeSignatureThreeFourAction();
+			}
+			else if(pressedKeys.SetEquals(insertTimeSignatureSixEightSet))
+			{
+				InsertTimeSignatureSixEightAction();
+			}
+			else if(pressedKeys.SetEquals(insertMissingBarLinesSet))
+			{
+				InsertMissingBarLinesAction();
+			}
 		}
 
 		private void SaveAsLilypondAction() => _fileReader.SaveToLilypond(_fileName);
+
+		private void SaveAsPdfAction() => _fileReader.SaveToPDF(_fileName);
+
+		private void InsertTrebleAction()
+		{
+			throw new NotImplementedException();
+		}
+
+		private void InsertTempoFourHundredTwentyAction()
+		{
+			throw new NotImplementedException();
+		}
+
+		private void InsertTimeSignatureFourFourAction()
+		{
+			throw new NotImplementedException();
+		}
+
+		private void InsertTimeSignatureThreeFourAction()
+		{
+			throw new NotImplementedException();
+		}
+
+		private void InsertTimeSignatureSixEightAction()
+		{
+			throw new NotImplementedException();
+		}
+
+		private void InsertMissingBarLinesAction()
+		{
+			throw new NotImplementedException();
+		}
 
 		public ICommand OnKeyUpCommand => new RelayCommand<KeyEventArgs>((e) =>
         {
