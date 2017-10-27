@@ -112,6 +112,7 @@
     <Compile Include="Managers\MidiSequenceEventArgs.cs" />
     <Compile Include="Managers\SJFileHandlerFactory.cs" />
     <Compile Include="Managers\SJFileReader.cs" />
+    <Compile Include="Managers\SJFormatTypeEnum.cs" />
     <Compile Include="Managers\SJLilypondFileHandler.cs" />
     <Compile Include="Managers\SJLilypondStateHandler.cs" />
     <Compile Include="Managers\SJMidiFileHandler.cs" />

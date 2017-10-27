@@ -78,18 +78,13 @@ namespace DPA_Musicsheets.ViewModels
 
         public RelayCommand UndoCommand => new RelayCommand(() =>
         {
-            _nextText = LilypondText;
-            LilypondText = _previousText;
-            _previousText = null;
-        }, () => _previousText != LilypondText);
+            _fileReader.UndoSong();
+        }, () => _fileReader.CanUndo());
 
         public RelayCommand RedoCommand => new RelayCommand(() =>
         {
-            _previousText = LilypondText;
-            LilypondText = _nextText;
-            _nextText = null;
-            RedoCommand.RaiseCanExecuteChanged();
-        }, () => _nextText != LilypondText);
+            _fileReader.RedoSong();
+        }, () => _fileReader.CanRedo());
 
         public ICommand SaveAsCommand => new RelayCommand(() =>
         {
