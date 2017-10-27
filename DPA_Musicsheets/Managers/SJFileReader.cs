@@ -15,15 +15,32 @@ namespace DPA_Musicsheets.Managers
 {
     public class SJFileReader
     {
-		private bool _isSavedSinceChange = true;
+        private Dictionary<SJFormatTypeEnum, Action> _updateActionDictionary;
+        private bool _isSavedSinceChange = true;
         public bool IsSavedSinceChange
         {
             get { return _isSavedSinceChange; }
             set { _isSavedSinceChange = value; }
         }
 
+        private SJSong _currentSong;
         //private SJFileHandlerFactory _fileHandlerFactory { get; set; 
-        private SJSong _currentSong { get; set; }
+        private SJSong currentSong
+        {
+            get { return _currentSong; }
+            set
+            {
+                _previousSongs.Push(_currentSong);
+                _nextSongs.Clear();
+                _currentSong = value;
+            }
+
+        }
+
+        private Stack<SJSong> _previousSongs { get; set; }
+        private Stack<SJSong> _nextSongs { get; set; }
+
+
         private ISJFileHandler _midiFileHandler { get; set; }
         private ISJFileHandler _lilypondFileHandler { get; set; }
         private ISJFileHandler _musicXMLFileHandler { get; set; }
@@ -53,6 +70,17 @@ namespace DPA_Musicsheets.Managers
             lilypondStateHandler = new SJLilypondStateHandler();
             midiStateHandler = new SJMidiStateHandler();
             staffsStateHandler = new SJWPFStaffStateHandler();
+
+            _previousSongs = new Stack<SJSong>();
+            _nextSongs = new Stack<SJSong>();
+
+            _updateActionDictionary = new Dictionary<SJFormatTypeEnum, Action>()
+            {
+                {SJFormatTypeEnum.Midi, ParseAndUpdateMidi},
+                {SJFormatTypeEnum.LilyPond, ParseAndUpdateLilypond},
+                {SJFormatTypeEnum.WPFStaffs, ParseAndUpdateWPFStaffs},
+                {SJFormatTypeEnum.None, null }
+            };
         }
 
         public void ReadFile(string fileName)
@@ -77,15 +105,11 @@ namespace DPA_Musicsheets.Managers
                         break;
                 }
 
-                Sequence midiSequence = _midiParser.ParseFromSJSong(song);
-                string lilypondContent = _lilypondParser.ParseFromSJSong(song);
-                IEnumerable<MusicalSymbol> symbols = _staffsParser.ParseFromSJSong(song);
-
-                lilypondStateHandler.UpdateData(lilypondContent);
-                midiStateHandler.UpdateData(midiSequence);
-                staffsStateHandler.UpdateData(symbols);
-
+                _nextSongs.Clear();
+                _previousSongs.Clear();
                 _currentSong = song;
+
+                UpdateDataExeptFormat(SJFormatTypeEnum.None);
             }
             catch (ArgumentException e)
             {
@@ -100,19 +124,66 @@ namespace DPA_Musicsheets.Managers
             {
                 var song = ((SJLilypondFileHandler)_lilypondFileHandler).LoadSongFromString(lilypondText);
 
-                Sequence midiSequence = _midiParser.ParseFromSJSong(song);
-                IEnumerable<MusicalSymbol> symbols = _staffsParser.ParseFromSJSong(song);
+                currentSong = song;
 
-                midiStateHandler.UpdateData(midiSequence);
-                staffsStateHandler.UpdateData(symbols);
-
-				_currentSong = song;
+                UpdateDataExeptFormat(SJFormatTypeEnum.LilyPond);
             }
             catch (ArgumentException e)
             {
                 //Console.WriteLine(e.StackTrace);
                 //throw e;
             }
+        }
+
+        private void UpdateDataExeptFormat(SJFormatTypeEnum formatTypeEnum)
+        {
+            foreach (var c in _updateActionDictionary.Where(e => e.Key != formatTypeEnum).Select(e => e.Value))
+            {
+                c?.Invoke();
+            }
+        }
+
+        private void ParseAndUpdateMidi()
+        {
+            Sequence midiSequence = _midiParser.ParseFromSJSong(_currentSong);
+            midiStateHandler.UpdateData(midiSequence);
+        }
+
+        private void ParseAndUpdateLilypond()
+        {
+            string lilypondContent = _lilypondParser.ParseFromSJSong(_currentSong);
+            lilypondStateHandler.UpdateData(lilypondContent);
+        }
+
+        private void ParseAndUpdateWPFStaffs()
+        {
+            IEnumerable<MusicalSymbol> symbols = _staffsParser.ParseFromSJSong(_currentSong);
+            staffsStateHandler.UpdateData(symbols);
+        }
+
+
+        public void UndoSong()
+        {
+            _nextSongs.Push(_currentSong);
+            _currentSong = _previousSongs.Pop();
+            UpdateDataExeptFormat(SJFormatTypeEnum.None);
+        }
+
+        public void RedoSong()
+        {
+            _previousSongs.Push(_currentSong);
+            _currentSong = _nextSongs.Pop();
+            UpdateDataExeptFormat(SJFormatTypeEnum.None);
+        }
+
+        public bool CanUndo()
+        {
+            return _previousSongs.Any();
+        }
+
+        public bool CanRedo()
+        {
+            return _nextSongs.Any();
         }
 
         #region Saving to files
@@ -138,10 +209,10 @@ namespace DPA_Musicsheets.Managers
             Sequence sequence = _midiParser.ParseFromSJSong(_currentSong);
 
             sequence.Save(fileName);
-			_isSavedSinceChange = true;
-		}
+            _isSavedSinceChange = true;
+        }
 
-		internal void SaveToPDF(string fileName)
+        internal void SaveToPDF(string fileName)
         {
             string tmpFileName = $"{fileName}-tmp.ly";
             SaveToLilypond(tmpFileName);
@@ -172,10 +243,10 @@ namespace DPA_Musicsheets.Managers
                 File.Move(sourceFolder + "\\" + sourceFileName + ".pdf", targetFolder + "\\" + targetFileName + ".pdf");
                 File.Delete(tmpFileName);
             }
-			_isSavedSinceChange = true;
-		}
+            _isSavedSinceChange = true;
+        }
 
-		internal void SaveToLilypond(string fileName)
+        internal void SaveToLilypond(string fileName)
         {
             var lilypondContent = _lilypondParser.ParseFromSJSong(_currentSong);
             using (StreamWriter outputFile = new StreamWriter(fileName))
@@ -183,10 +254,10 @@ namespace DPA_Musicsheets.Managers
                 outputFile.Write(lilypondContent);
                 outputFile.Close();
             }
-			_isSavedSinceChange = true;
-		}
+            _isSavedSinceChange = true;
+        }
 
-		#endregion Saving to files
+        #endregion Saving to files
 
-	}
+    }
 }
