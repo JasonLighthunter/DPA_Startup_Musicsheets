@@ -186,6 +186,11 @@ namespace DPA_Musicsheets.Managers
             return _nextSongs.Any();
         }
 
+        public SJTimeSignature GetTimeSignatue()
+        {
+            return _currentSong.TimeSignature;
+        }
+
         #region Saving to files
         public void SaveToFile(string fileName)
         {
