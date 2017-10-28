@@ -238,7 +238,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Files\Alle-eendjes-zwemmen-in-het-water.ly" />
-    <None Include="Files\Alle-eendjes-zwemmen-in-het-water.mid" />
+    <None Include="Files\Alle-eendjes-zwemmen-in-het-water.mid">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Files\Twee-emmertjes-water-halen.ly" />
     <None Include="Files\Twee-emmertjes-water-halen.mid" />
     <None Include="Files\Twee-emmertjes-water-halen_ZonderHerhalingMaatwisseling.ly" />
