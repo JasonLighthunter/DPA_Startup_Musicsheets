@@ -14,6 +14,8 @@
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <WarningLevel>4</WarningLevel>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <TargetFrameworkProfile />
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -26,10 +28,8 @@
     <MapFileExtensions>true</MapFileExtensions>
     <ApplicationRevision>0</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
-    <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
-    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -81,6 +81,7 @@
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Windows.Interactivity, Version=4.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\MvvmLightLibs.5.3.0.0\lib\net45\System.Windows.Interactivity.dll</HintPath>
       <Private>True</Private>
@@ -103,13 +104,59 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Builders\SJBarBuilder.cs" />
+    <Compile Include="Builders\SJSongBuilder.cs" />
+    <Compile Include="Builders\SJTimeSignatureBuilder.cs" />
+    <Compile Include="ChainOfResponsibility\BaseCommandHandler.cs" />
+    <Compile Include="ChainOfResponsibility\ConcreteHandler.cs" />
+    <Compile Include="ChainOfResponsibility\ISJHandler.cs" />
+    <Compile Include="Commands\InsertMissingBarLinesCommand.cs" />
+    <Compile Include="Commands\InsertTempoCommand.cs" />
+    <Compile Include="Commands\InsertTimeSignatureCommand.cs" />
+    <Compile Include="Commands\InsertTrebleCommand.cs" />
+    <Compile Include="Commands\ISJCommand.cs" />
+    <Compile Include="Commands\OpenFileCommand.cs" />
+    <Compile Include="Commands\SaveAsLilypondCommand.cs" />
+    <Compile Include="Commands\SaveAsPDFCommand.cs" />
+    <Compile Include="Commands\SJLilypondViewModelCommand.cs" />
+    <Compile Include="Commands\SJMainViewModelCommand.cs" />
+    <Compile Include="CustomViews\SelectionBindingTextBox.cs" />
+    <Compile Include="Managers\ISJFileHandler.cs" />
+    <Compile Include="Managers\ISJStateHandler.cs" />
     <Compile Include="Managers\MidiSequenceEventArgs.cs" />
+    <Compile Include="Managers\SJFileHandlerFactory.cs" />
+    <Compile Include="Managers\SJFileReader.cs" />
+    <Compile Include="Managers\SJFormatTypeEnum.cs" />
+    <Compile Include="Managers\SJLilypondFileHandler.cs" />
+    <Compile Include="Managers\SJLilypondStateHandler.cs" />
+    <Compile Include="Managers\SJMidiFileHandler.cs" />
+    <Compile Include="Managers\SJMidiStateHandler.cs" />
+    <Compile Include="Builders\SJNoteBuilder.cs" />
+    <Compile Include="Builders\SJNoteFactory.cs" />
+    <Compile Include="Managers\SJMusicXMLFileHandler.cs" />
+    <Compile Include="Managers\SJWPFStaffStateHandler.cs" />
     <Compile Include="Managers\WPFStaffsEventArgs.cs" />
     <Compile Include="Managers\LilypondEventArgs.cs" />
     <Compile Include="Messages\CurrentStateMessage.cs" />
-    <Compile Include="Managers\FileHandler.cs" />
     <Compile Include="Models\LilypondToken.cs" />
     <Compile Include="Models\LilypondTokenKind.cs" />
+    <Compile Include="Models\SJBar.cs" />
+    <Compile Include="Models\SJBaseNote.cs" />
+    <Compile Include="Models\SJClefTypeEnum.cs" />
+    <Compile Include="Models\SJLilypondParserKeyEnum.cs" />
+    <Compile Include="Models\SJNote.cs" />
+    <Compile Include="Models\SJNoteDurationEnum.cs" />
+    <Compile Include="Models\SJPitchEnum.cs" />
+    <Compile Include="Models\SJRest.cs" />
+    <Compile Include="Models\SJSong.cs" />
+    <Compile Include="Models\SJTimeSignature.cs" />
+    <Compile Include="Models\SJUnheardNote.cs" />
+    <Compile Include="Parsers\ISJParser.cs" />
+    <Compile Include="Parsers\SJLilypondParser.cs" />
+    <Compile Include="Parsers\SJMidiParser.cs" />
+    <Compile Include="Parsers\SJMusicXMLParser.cs" />
+    <Compile Include="Parsers\SJWPFStaffsParser.cs" />
+    <Compile Include="Utility\EnumConverters.cs" />
     <Compile Include="ViewModels\MidiPlayerViewModel.cs" />
     <Compile Include="ViewModels\StaffsViewModel.cs" />
     <Compile Include="Views\MidiPlayerCtrl.xaml.cs">
@@ -190,21 +237,16 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Files\Alle-eendjes-zwemmen-in-het-water.ly">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    <None Include="Files\Alle-eendjes-zwemmen-in-het-water.ly" />
     <None Include="Files\Alle-eendjes-zwemmen-in-het-water.mid">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Files\Twee-emmertjes-water-halen.ly">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Files\Twee-emmertjes-water-halen.mid">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Files\Twee-emmertjes-water-halen_ZonderHerhalingMaatwisseling.ly">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    <None Include="Files\Twee-emmertjes-water-halen.ly" />
+    <None Include="Files\Twee-emmertjes-water-halen.mid" />
+    <None Include="Files\Twee-emmertjes-water-halen_ZonderHerhalingMaatwisseling.ly" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Files\Alle-eendjes-zwemmen-in-het-water.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

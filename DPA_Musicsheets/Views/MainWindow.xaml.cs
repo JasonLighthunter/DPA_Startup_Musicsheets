@@ -21,6 +21,8 @@ using System.Windows.Shapes;
 using DPA_Musicsheets;
 using PSAMWPFControlLibrary;
 using DPA_Musicsheets.ViewModels;
+using DPA_Musicsheets.Managers;
+using DPA_Musicsheets.Models;
 
 namespace DPA_Musicsheets
 {

@@ -8,8 +8,6 @@ namespace DPA_Musicsheets.ViewModels
 {
     public class MidiPlayerViewModel : ViewModelBase
     {
-        private FileHandler _fileHandler;
-
         private OutputDevice _outputDevice;
 
         // De sequencer maakt het mogelijk om een sequence af te spelen.
@@ -18,7 +16,7 @@ namespace DPA_Musicsheets.ViewModels
 
         private bool _running;
 
-        public MidiPlayerViewModel(FileHandler fileHandler)
+        public MidiPlayerViewModel()
         {
             // De OutputDevice is een midi device of het midikanaal van je PC.
             // Hierop gaan we audio streamen.
@@ -39,10 +37,10 @@ namespace DPA_Musicsheets.ViewModels
                 _running = false;
             };
 
-            _fileHandler = fileHandler;
-            _fileHandler.MidiSequenceChanged += (src, args) =>
+            SJMidiStateHandler.StateDataChanged += (src, args) =>
             {
                 StopCommand.Execute(null);
+                _sequencer.Position = 0;
                 _sequencer.Sequence = args.MidiSequence;
                 UpdateButtons();
             };
