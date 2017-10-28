@@ -15,14 +15,12 @@ namespace DPA_Musicsheets.ViewModels
         {
             ServiceLocator.SetLocatorProvider(() => SimpleIoc.Default);
 
-            SimpleIoc.Default.Register<FileHandler>();
-
             SimpleIoc.Default.Register<SJNoteFactory>();
             SimpleIoc.Default.Register<SJNoteBuilder>();
 
             SimpleIoc.Default.Register<SJLilypondFileHandler>();
             SimpleIoc.Default.Register<SJMidiFileHandler>();
-			SimpleIoc.Default.Register<SJMusicXMLFileHandler>();
+            SimpleIoc.Default.Register<SJMusicXMLFileHandler>();
 
             //noteFactory.AddNoteType("R", typeof(SJRest));
             //noteFactory.AddNoteType("N", typeof(SJNote));
@@ -31,7 +29,7 @@ namespace DPA_Musicsheets.ViewModels
             SimpleIoc.Default.Register<SJLilypondParser>();
             SimpleIoc.Default.Register<SJMidiParser>();
             SimpleIoc.Default.Register<SJWPFStaffsParser>();
-			SimpleIoc.Default.Register<SJMusicXMLParser>();
+            SimpleIoc.Default.Register<SJMusicXMLParser>();
 
             SimpleIoc.Default.Register<SJFileHandlerFactory>();
 

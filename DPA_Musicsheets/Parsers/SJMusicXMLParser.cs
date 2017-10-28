@@ -106,11 +106,6 @@ namespace DPA_Musicsheets.Parsers
 
         private SJBaseNote GetBaseNoteFromNoteArray(string[] noteArray)
         {
-            string string1 = noteArray[0].Trim();
-            string string2 = "rest/";
-
-            Console.WriteLine(string1 + " == " + string2);
-
             SJBaseNote returnValue = (noteArray[0].Trim() == "rest /") ? GetRestFromNoteArray(noteArray) : GetNoteFromNoteArray(noteArray);
             return returnValue;
         }

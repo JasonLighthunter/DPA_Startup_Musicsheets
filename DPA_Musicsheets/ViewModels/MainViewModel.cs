@@ -8,11 +8,14 @@ using PSAMWPFControlLibrary;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
+using DPA_Musicsheets.ChainOfResponsibility;
+using DPA_Musicsheets.Commands;
 
 namespace DPA_Musicsheets.ViewModels
 {
@@ -34,43 +37,43 @@ namespace DPA_Musicsheets.ViewModels
         {
             get { return _currentState; }
             set
-			{
-				_currentState = value;
-				RaisePropertyChanged(() => CurrentState);
-			}
+            {
+                _currentState = value;
+                RaisePropertyChanged(() => CurrentState);
+            }
         }
 
-        //private FileHandler _fileHandler;
+        private HashSet<string> pressedKeys = new HashSet<string>();
+
         private SJFileReader _fileReader;
 
-		//public MainViewModel(FileHandler fileHandler)
-		//{ 
-		//	_fileHandler = fileHandler;
-		//	FileName = @"files/alle-eendjes-zwemmen-in-het-water.mid";
+        public SJFileReader FileReader
+        {
+            get { return _fileReader; }
+            private set { _fileReader = value; }
+        }
 
-		//	MessengerInstance.Register<CurrentStateMessage>(this, (message) => CurrentState = message.State);
-		//}
+        private ISJHandler _baseHandler;
 
         public MainViewModel(SJFileReader fileReader)
         {
             _fileReader = fileReader;
             FileName = @"files/alle-eendjes-zwemmen-in-het-water.mid";
 
+
+            _baseHandler = new ConcreteHandler(new SaveAsPDFCommand(this), new HashSet<string>() { "LeftCtrl", "S", "P" });
+            ISJHandler handler = new ConcreteHandler(new SaveAsLilypondCommand(this), new HashSet<string> { "S", "LeftCtrl" });
+            handler.SetNext(new ConcreteHandler(new OpenFileCommand(this), new HashSet<string>() { "LeftCtrl", "O" }));
+            _baseHandler.SetNext(handler);
+
             MessengerInstance.Register<CurrentStateMessage>(this, (message) => CurrentState = message.State);
         }
 
         public ICommand OpenFileCommand => new RelayCommand(() =>
         {
-            OpenFileDialog openFileDialog = new OpenFileDialog() { Filter = "Midi, LilyPond or MusicXML files (*.mid *.ly *.xml)|*.mid;*.ly;*.xml" };
-            if (openFileDialog.ShowDialog() == true)
-            {
-                FileName = openFileDialog.FileName;
-            }
+            ISJCommand command = new OpenFileCommand(this);
+            command.Execute();
         });
-        //public ICommand LoadCommand => new RelayCommand(() =>
-        //{
-        //	_fileHandler.OpenFile(FileName);
-        //});
 
         public ICommand LoadCommand => new RelayCommand(() =>
         {
@@ -84,16 +87,44 @@ namespace DPA_Musicsheets.ViewModels
 
         public ICommand OnKeyDownCommand => new RelayCommand<KeyEventArgs>((e) =>
         {
-            Console.WriteLine($"Key down: {e.Key}");
+            //Console.WriteLine($"Key down: {e.Key}");
+            pressedKeys.Add(e.Key.ToString());
+            CheckPressedKeysForCombination();
         });
 
-        public ICommand OnKeyUpCommand => new RelayCommand(() =>
+        private void CheckPressedKeysForCombination()
         {
-            Console.WriteLine("Key Up");
+            if (_baseHandler.Handle(pressedKeys))
+            {
+                pressedKeys.Clear();
+            }
+        }
+
+        public ICommand OnKeyUpCommand => new RelayCommand<KeyEventArgs>((e) =>
+        {
+            //Console.WriteLine($"Key Up: {e.Key}");
+            pressedKeys.Remove(e.Key.ToString());
         });
 
         public ICommand OnWindowClosingCommand => new RelayCommand(() =>
         {
+            if (!_fileReader.IsSavedSinceChange)
+            {
+                MessageBoxButton button = MessageBoxButton.YesNo;
+                var result = MessageBox.Show("Veranderingen zijn nog niet opgeslagen. Wilt u dit alsnog doen?", "Veranderingen zijn nog niet opgeslagen.", button);
+                if (result == MessageBoxResult.Yes)
+                {
+                    SaveFileDialog saveFileDialog = new SaveFileDialog() { Filter = "Midi|*.mid|Lilypond|*.ly|PDF|*.pdf" };
+                    if (saveFileDialog.ShowDialog() == true)
+                    {
+                        _fileReader.SaveToFile(saveFileDialog.FileName);
+                        if (!_fileReader.IsSavedSinceChange)
+                        {
+                            MessageBox.Show($"Extension {Path.GetExtension(saveFileDialog.FileName)} is not supported.");
+                        }
+                    }
+                }
+            }
             ViewModelLocator.Cleanup();
         });
     }
